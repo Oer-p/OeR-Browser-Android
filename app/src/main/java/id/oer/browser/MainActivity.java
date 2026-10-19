@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 
     private final int black = Color.rgb(5, 5, 5);
     private final int dark = Color.rgb(23, 23, 23);
-    private final int card = Color.rgb(32, 33, 36);      // mirip Google dark card
+    private final int card = Color.rgb(32, 33, 36);
     private final int green = Color.rgb(54, 226, 121);
     private final int white = Color.WHITE;
     private final int gray = Color.rgb(165, 165, 165);
@@ -104,7 +104,6 @@ public class MainActivity extends Activity {
         return input;
     }
 
-    // Logo O pelangi
     private class RainbowTextView extends TextView {
         public RainbowTextView(String text, int size) {
             super(MainActivity.this);
@@ -119,17 +118,17 @@ public class MainActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             if (getWidth() > 0) {
                 getPaint().setShader(new LinearGradient(
-                    0, 0, getWidth(), 0,
-                    new int[]{
-                        Color.rgb(255, 65, 75),
-                        Color.rgb(255, 180, 45),
-                        Color.rgb(255, 230, 65),
-                        Color.rgb(54, 226, 121),
-                        Color.rgb(55, 140, 255),
-                        Color.rgb(190, 90, 255)
-                    },
-                    null,
-                    Shader.TileMode.CLAMP
+                        0, 0, getWidth(), 0,
+                        new int[]{
+                                Color.rgb(255, 65, 75),
+                                Color.rgb(255, 180, 45),
+                                Color.rgb(255, 230, 65),
+                                Color.rgb(54, 226, 121),
+                                Color.rgb(55, 140, 255),
+                                Color.rgb(190, 90, 255)
+                        },
+                        null,
+                        Shader.TileMode.CLAMP
                 ));
             }
             super.onDraw(canvas);
@@ -157,7 +156,6 @@ public class MainActivity extends Activity {
         parent.addView(logo);
     }
 
-    // Ikon search modern (lebih bersih)
     private class SearchIcon extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -177,17 +175,14 @@ public class MainActivity extends Activity {
             paint.setColor(Color.rgb(180, 180, 180));
 
             canvas.drawCircle(cx, cy, radius, paint);
-
-            // handle
             canvas.drawLine(
-                cx + radius * 0.72f, cy + radius * 0.72f,
-                cx + radius * 1.45f, cy + radius * 1.45f,
-                paint
+                    cx + radius * 0.72f, cy + radius * 0.72f,
+                    cx + radius * 1.45f, cy + radius * 1.45f,
+                    paint
             );
         }
     }
 
-    // Ikon mikrofon modern
     private View createMicIcon() {
         return new View(this) {
             private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -203,11 +198,8 @@ public class MainActivity extends Activity {
                 paint.setStrokeWidth(2.4f);
                 paint.setStrokeCap(Paint.Cap.ROUND);
 
-                // body
                 canvas.drawRoundRect(cx - 5.5f, cy - 11, cx + 5.5f, cy + 4, 6, 6, paint);
-                // arc
                 canvas.drawArc(cx - 11, cy - 5, cx + 11, cy + 13, 0, 180, false, paint);
-                // stand
                 canvas.drawLine(cx, cy + 13, cx, cy + 18, paint);
                 canvas.drawLine(cx - 6, cy + 18, cx + 6, cy + 18, paint);
             }
@@ -230,7 +222,7 @@ public class MainActivity extends Activity {
         account.setOnClickListener(v -> showAccountInfo());
 
         header.addView(account, new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT, 40
+                LinearLayout.LayoutParams.WRAP_CONTENT, 40
         ));
 
         root.addView(header, new LinearLayout.LayoutParams(-1, 60));
@@ -238,10 +230,10 @@ public class MainActivity extends Activity {
 
     private void showAccountInfo() {
         new AlertDialog.Builder(this)
-            .setTitle("Akun OoeR")
-            .setMessage("Fitur akun OoeR sedang disiapkan.\n\nLogin dan pendaftaran akan dihubungkan setelah konfigurasi Supabase dipastikan.")
-            .setPositiveButton("Mengerti", null)
-            .show();
+                .setTitle("Akun OoeR")
+                .setMessage("Fitur akun OoeR sedang disiapkan.\n\nLogin dan pendaftaran akan dihubungkan setelah konfigurasi Supabase dipastikan.")
+                .setPositiveButton("Mengerti", null)
+                .show();
     }
 
     private void createAddressBar() {
@@ -300,48 +292,41 @@ public class MainActivity extends Activity {
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // ==================== HOME (mirip Google) ====================
+        // HOME
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
-        // Spacer atas
         View topSpace = new View(this);
         homePanel.addView(topSpace, new LinearLayout.LayoutParams(1, 0, 0.9f));
 
-        // Logo besar
         addLogo(homePanel, 58);
 
-        // Subtitle
         TextView subtitle = makeText("Jelajahi dunia dengan OoeR", 14, gray);
         subtitle.setGravity(Gravity.CENTER);
         subtitle.setPadding(0, 14, 0, 42);
         homePanel.addView(subtitle);
 
-        // ===== Search Bar modern =====
+        // Search Bar
         LinearLayout searchBar = new LinearLayout(this);
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
         searchBar.setPadding(18, 0, 12, 0);
         searchBar.setBackground(rounded(card, 32));
 
-        // Ikon search
         SearchIcon searchIcon = new SearchIcon();
         searchBar.addView(searchIcon, new LinearLayout.LayoutParams(42, 42));
 
-        // Input
         homeSearchInput = makeInput("Cari apa");
         searchBar.addView(homeSearchInput, new LinearLayout.LayoutParams(0, 56, 1));
 
-        // Mic
         View mic = createMicIcon();
         searchBar.addView(mic, new LinearLayout.LayoutParams(42, 42));
         mic.setOnClickListener(v ->
-            Toast.makeText(this, "Fitur mikrofon akan dikembangkan", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Fitur mikrofon akan dikembangkan", Toast.LENGTH_SHORT).show()
         );
 
-        // Tombol kirim (hijau)
         Button sendBtn = new Button(this);
         sendBtn.setText("↑");
         sendBtn.setTextSize(20);
@@ -353,7 +338,7 @@ public class MainActivity extends Activity {
         searchBar.addView(sendBtn, new LinearLayout.LayoutParams(44, 44));
 
         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 64
+                LinearLayout.LayoutParams.MATCH_PARENT, 64
         );
         searchParams.setMargins(28, 0, 28, 0);
         homePanel.addView(searchBar, searchParams);
@@ -367,7 +352,7 @@ public class MainActivity extends Activity {
             return false;
         });
 
-        // ===== Quick Actions (seperti Google) =====
+        // Quick Actions
         LinearLayout quickRow = new LinearLayout(this);
         quickRow.setOrientation(LinearLayout.HORIZONTAL);
         quickRow.setGravity(Gravity.CENTER);
@@ -386,18 +371,17 @@ public class MainActivity extends Activity {
 
         homePanel.addView(quickRow);
 
-        // Spacer bawah
         View bottomSpace = new View(this);
         homePanel.addView(bottomSpace, new LinearLayout.LayoutParams(1, 0, 1.4f));
 
-        // ==================== WEBVIEW ====================
+        // WebView
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
-        // ==================== HTML EDITOR ====================
+        // HTML Editor
         htmlPanel = new LinearLayout(this);
         htmlPanel.setOrientation(LinearLayout.VERTICAL);
         htmlPanel.setPadding(16, 12, 16, 12);
@@ -415,11 +399,11 @@ public class MainActivity extends Activity {
         htmlInput.setPadding(14, 14, 14, 14);
         htmlInput.setBackground(rounded(dark, 12));
         htmlInput.setText(
-            "<h1>Selamat datang di OoeR</h1>\n" +
-            "<p>Ini adalah mesin render HTML OoeR.</p>\n" +
-            "<h2>Fitur awal</h2>\n" +
-            "<ul>\n<li>Judul</li>\n<li>Paragraf</li>\n<li>Daftar</li>\n</ul>\n" +
-            "<hr>\n<p>Mesin akan terus dikembangkan.</p>"
+                "<h1>Selamat datang di OoeR</h1>\n" +
+                "<p>Ini adalah mesin render HTML OoeR.</p>\n" +
+                "<h2>Fitur awal</h2>\n" +
+                "<ul>\n<li>Judul</li>\n<li>Paragraf</li>\n<li>Daftar</li>\n</ul>\n" +
+                "<hr>\n<p>Mesin akan terus dikembangkan.</p>"
         );
         htmlPanel.addView(htmlInput, new LinearLayout.LayoutParams(-1, 0, 1));
 
@@ -440,10 +424,9 @@ public class MainActivity extends Activity {
         htmlPanel.addView(resultScroll, new LinearLayout.LayoutParams(-1, 0, 1));
 
         renderButton.setOnClickListener(v ->
-            renderView.renderHtml(htmlInput.getText().toString())
+                renderView.renderHtml(htmlInput.getText().toString())
         );
 
-        // Add to frame
         contentFrame.addView(homePanel, new FrameLayout.LayoutParams(-1, -1));
         contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         contentFrame.addView(htmlPanel, new FrameLayout.LayoutParams(-1, -1));
@@ -451,7 +434,6 @@ public class MainActivity extends Activity {
         root.addView(contentFrame, new LinearLayout.LayoutParams(-1, 0, 1));
     }
 
-    // Chip / tombol cepat seperti Google
     private View makeQuickChip(String text, View.OnClickListener listener) {
         TextView chip = new TextView(this);
         chip.setText(text);
@@ -463,8 +445,8 @@ public class MainActivity extends Activity {
         chip.setOnClickListener(listener);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(8, 0, 8, 0);
         chip.setLayoutParams(params);
@@ -563,4 +545,53 @@ public class MainActivity extends Activity {
                 String line = raw.trim();
                 if (line.isEmpty()) continue;
 
-                TextView tv =
+                TextView tv = new TextView(getContext());
+                tv.setTextColor(Color.BLACK);
+                tv.setPadding(0, 4, 0, 4);
+
+                if (line.startsWith("<h1>") && line.endsWith("</h1>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(24);
+                    tv.setTypeface(null, Typeface.BOLD);
+                    tv.setPadding(0, 12, 0, 8);
+                } else if (line.startsWith("<h2>") && line.endsWith("</h2>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(20);
+                    tv.setTypeface(null, Typeface.BOLD);
+                    tv.setPadding(0, 10, 0, 6);
+                } else if (line.startsWith("<p>") && line.endsWith("</p>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(15);
+                    tv.setPadding(0, 6, 0, 6);
+                } else if (line.startsWith("<li>") && line.endsWith("</li>")) {
+                    tv.setText("•  " + stripTags(line));
+                    tv.setTextSize(15);
+                    tv.setPadding(16, 3, 0, 3);
+                } else if (line.equals("<hr>") || line.equals("<hr/>") || line.equals("<hr />")) {
+                    View lineView = new View(getContext());
+                    lineView.setBackgroundColor(Color.rgb(200, 200, 200));
+                    addView(lineView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                    continue;
+                } else if (line.startsWith("<ul>") || line.startsWith("</ul>") ||
+                        line.startsWith("<ol>") || line.startsWith("</ol>")) {
+                    continue;
+                } else {
+                    String clean = stripTags(line);
+                    if (clean.isEmpty()) continue;
+                    tv.setText(clean);
+                    tv.setTextSize(15);
+                }
+                addView(tv);
+            }
+        }
+
+        private String stripTags(String input) {
+            return input.replaceAll("<[^>]+>", "")
+                    .replace("&nbsp;", " ")
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
+                    .replace("&amp;", "&")
+                    .trim();
+        }
+    }
+}
