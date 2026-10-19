@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
     private GradientDrawable rounded(int color, float radius) {
         GradientDrawable shape = new GradientDrawable();
         shape.setColor(color);
-        shape.setCornerRadius(radius);
+        shape.setCornerRadius(dp(radius));
         return shape;
     }
 
@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
         return input;
     }
 
-    // ==================== LOGO OoeR ====================
+    // ==================== LOGO OeR ====================
 
     private class RainbowTextView extends TextView {
 
@@ -168,6 +168,7 @@ public class MainActivity extends Activity {
         r.setIncludeFontPadding(false);
         logo.addView(r);
 
+        logo.setGravity(Gravity.CENTER);
         parent.addView(logo);
     }
 
@@ -193,6 +194,7 @@ public class MainActivity extends Activity {
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(dp(2));
+            paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setColor(Color.rgb(180, 180, 180));
 
             canvas.drawCircle(cx, cy, radius, paint);
@@ -267,22 +269,24 @@ public class MainActivity extends Activity {
 
     private void createHeader() {
         accountButton = makeButton("Akun");
+
         accountButton.setTextColor(green);
         accountButton.setTextSize(15);
         accountButton.setTypeface(null, Typeface.BOLD);
         accountButton.setGravity(Gravity.CENTER);
-        accountButton.setPadding(dp(24), 0, dp(24), 0);
+        accountButton.setPadding(dp(20), 0, dp(20), 0);
         accountButton.setMinHeight(0);
         accountButton.setMinimumHeight(0);
-        accountButton.setBackground(rounded(dark, dp(28)));
+        accountButton.setBackground(rounded(dark, 28));
+
         accountButton.setOnClickListener(v -> showAccountInfo());
     }
 
     private void showAccountInfo() {
         new AlertDialog.Builder(this)
-                .setTitle("Akun OoeR")
+                .setTitle("Akun OeR")
                 .setMessage(
-                        "Fitur akun OoeR sedang disiapkan.\n\n" +
+                        "Fitur akun OeR sedang disiapkan.\n\n" +
                         "Login dan pendaftaran akan dihubungkan " +
                         "setelah konfigurasi Supabase dipastikan."
                 )
@@ -374,14 +378,18 @@ public class MainActivity extends Activity {
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
+        // Ruang atas dan bawah seimbang agar logo dan pencarian
+        // berada di area tengah layar.
         View topSpace = new View(this);
         homePanel.addView(topSpace,
-                new LinearLayout.LayoutParams(1, 0, 0.9f));
+                new LinearLayout.LayoutParams(
+                        1, 0, 1f
+                ));
 
         addLogo(homePanel, 76);
 
         TextView subtitle = makeText(
-                "Jelajahi dunia dengan OoeR",
+                "Jelajahi dunia dengan OeR",
                 14,
                 gray
         );
@@ -396,23 +404,30 @@ public class MainActivity extends Activity {
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
         searchBar.setPadding(dp(12), 0, dp(10), 0);
-        searchBar.setBackground(rounded(card, dp(32)));
+        searchBar.setBackground(rounded(card, 32));
+        searchBar.setClipToPadding(false);
 
         SearchIcon searchIcon = new SearchIcon();
+
         searchBar.addView(searchIcon,
-                new LinearLayout.LayoutParams(dp(36), dp(42)));
+                new LinearLayout.LayoutParams(dp(32), dp(42)));
 
         homeSearchInput = makeInput("Cari apa");
+
+        homeSearchInput.setPadding(dp(6), 0, dp(4), 0);
+        homeSearchInput.setTextSize(16);
+
         searchBar.addView(homeSearchInput,
-                new LinearLayout.LayoutParams(0, dp(56), 1));
+                new LinearLayout.LayoutParams(0, dp(54), 1));
 
         View mic = createMicIcon();
+
         searchBar.addView(mic,
                 new LinearLayout.LayoutParams(dp(34), dp(42)));
 
         mic.setOnClickListener(v ->
                 Toast.makeText(
-                        this,
+                        MainActivity.this,
                         "Fitur mikrofon akan dikembangkan",
                         Toast.LENGTH_SHORT
                 ).show()
@@ -424,32 +439,27 @@ public class MainActivity extends Activity {
         sendBtn.setTypeface(null, Typeface.BOLD);
         sendBtn.setTextColor(Color.BLACK);
         sendBtn.setAllCaps(false);
+        sendBtn.setGravity(Gravity.CENTER);
         sendBtn.setPadding(0, 0, 0, dp(2));
         sendBtn.setMinWidth(0);
         sendBtn.setMinimumWidth(0);
-        sendBtn.setBackground(rounded(green, dp(22)));
+        sendBtn.setMinimumHeight(0);
+        sendBtn.setBackground(rounded(green, 22));
+
+        sendBtn.setStateListAnimator(null);
 
         searchBar.addView(sendBtn,
                 new LinearLayout.LayoutParams(dp(42), dp(42)));
 
-        int screenWidth = getResources()
-                .getDisplayMetrics().widthPixels;
-
-        int sideSpace = dp(16);
-        int maxSearchWidth = dp(380);
-
-        int searchWidth = Math.min(
-                maxSearchWidth,
-                screenWidth - sideSpace * 2
-        );
-
+        // MATCH_PARENT dan margin DP mencegah kolom pencarian
+        // terpotong akibat perbedaan satuan pixel dan dp.
         LinearLayout.LayoutParams searchParams =
                 new LinearLayout.LayoutParams(
-                        searchWidth,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
                         dp(64)
                 );
 
-        searchParams.gravity = Gravity.CENTER_HORIZONTAL;
+        searchParams.setMargins(dp(16), 0, dp(16), 0);
         homePanel.addView(searchBar, searchParams);
 
         sendBtn.setOnClickListener(
@@ -469,7 +479,9 @@ public class MainActivity extends Activity {
 
         View bottomSpace = new View(this);
         homePanel.addView(bottomSpace,
-                new LinearLayout.LayoutParams(1, 0, 1.4f));
+                new LinearLayout.LayoutParams(
+                        1, 0, 1f
+                ));
 
         // ==================== WEBVIEW ====================
 
@@ -487,10 +499,11 @@ public class MainActivity extends Activity {
         htmlPanel.setBackgroundColor(black);
 
         TextView htmlTitle = makeText(
-                "Editor HTML OoeR",
+                "Editor HTML OeR",
                 18,
                 green
         );
+
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -500,11 +513,11 @@ public class MainActivity extends Activity {
         htmlInput.setGravity(Gravity.TOP | Gravity.START);
         htmlInput.setMinLines(5);
         htmlInput.setPadding(dp(14), dp(14), dp(14), dp(14));
-        htmlInput.setBackground(rounded(dark, dp(12)));
+        htmlInput.setBackground(rounded(dark, 12));
 
         htmlInput.setText(
-                "<h1>Selamat datang di OoeR</h1>\n" +
-                "<p>Ini adalah mesin render HTML OoeR.</p>\n" +
+                "<h1>Selamat datang di OeR</h1>\n" +
+                "<p>Ini adalah mesin render HTML OeR.</p>\n" +
                 "<h2>Fitur awal</h2>\n" +
                 "<ul>\n" +
                 "<li>Judul</li>\n" +
@@ -545,7 +558,8 @@ public class MainActivity extends Activity {
                 renderView.renderHtml(htmlInput.getText().toString())
         );
 
-        // Pasang panel ke frame.
+        // ==================== PASANG PANEL ====================
+
         contentFrame.addView(homePanel,
                 new FrameLayout.LayoutParams(-1, -1));
 
@@ -555,7 +569,8 @@ public class MainActivity extends Activity {
         contentFrame.addView(htmlPanel,
                 new FrameLayout.LayoutParams(-1, -1));
 
-        // Tombol Akun berada di sisi kiri, turun ke area tengah.
+        // Akun berada di kiri atas area konten.
+        // Area konten sudah berada di bawah status bar Android.
         FrameLayout.LayoutParams accountParams =
                 new FrameLayout.LayoutParams(
                         dp(100),
@@ -563,10 +578,8 @@ public class MainActivity extends Activity {
                         Gravity.TOP | Gravity.LEFT
                 );
 
-        accountParams.leftMargin = dp(20);
-        accountParams.topMargin = (int) (
-                getResources().getDisplayMetrics().heightPixels * 0.40f
-        );
+        accountParams.leftMargin = dp(16);
+        accountParams.topMargin = dp(12);
 
         contentFrame.addView(accountButton, accountParams);
 
