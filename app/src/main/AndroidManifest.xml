@@ -3,12 +3,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:label="OeR Browser"
-        android:usesCleartextTraffic="false">
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        android:allowBackup="false">
 
         <activity
-            android:name=".MainActivity"
+            android:name="id.oer.browser.MainActivity"
             android:exported="true">
 
             <intent-filter>
@@ -17,6 +17,7 @@
             </intent-filter>
 
         </activity>
+
     </application>
 
 </manifest>
