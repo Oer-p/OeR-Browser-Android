@@ -270,9 +270,11 @@ public class MainActivity extends Activity {
 
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(
-                Gravity.RIGHT | Gravity.CENTER_VERTICAL
+                Gravity.LEFT | Gravity.CENTER_VERTICAL
         );
-        header.setPadding(dp(8), 0, dp(18), 0);
+
+        // Akun di kiri, tidak menempel tepi dan sedikit turun.
+        header.setPadding(dp(16), dp(10), dp(8), 0);
         header.setBackgroundColor(black);
 
         Button account = makeButton("Akun");
@@ -286,13 +288,13 @@ public class MainActivity extends Activity {
         account.setOnClickListener(v -> showAccountInfo());
 
         header.addView(account, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 dp(40)
         ));
 
         root.addView(header, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(56)
+                dp(66)
         ));
     }
 
@@ -387,22 +389,24 @@ public class MainActivity extends Activity {
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // Beranda OoeR
+        // ==================== BERANDA OoeR ====================
+
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
         View topSpace = new View(this);
+
         homePanel.addView(topSpace,
                 new LinearLayout.LayoutParams(
                         1, 0, 0.9f
                 ));
 
-        // Logo
-        addLogo(homePanel, 58);
+        // Logo diperbesar, tetap satu.
+        addLogo(homePanel, 76);
 
-        // Slogan
+        // Slogan didekatkan ke kolom pencarian.
         TextView subtitle = makeText(
                 "Jelajahi dunia dengan OoeR",
                 14,
@@ -410,10 +414,11 @@ public class MainActivity extends Activity {
         );
 
         subtitle.setGravity(Gravity.CENTER);
-        subtitle.setPadding(0, dp(14), 0, dp(36));
+        subtitle.setPadding(0, dp(8), 0, dp(16));
         homePanel.addView(subtitle);
 
-        // Kolom pencarian
+        // ==================== KOLOM PENCARIAN ====================
+
         LinearLayout searchBar = new LinearLayout(this);
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
@@ -443,7 +448,7 @@ public class MainActivity extends Activity {
                 ).show()
         );
 
-        // Tombol pencarian hijau
+        // Tombol pencarian hijau.
         Button sendBtn = new Button(this);
         sendBtn.setText("↑");
         sendBtn.setTextSize(20);
@@ -458,16 +463,16 @@ public class MainActivity extends Activity {
         searchBar.addView(sendBtn,
                 new LinearLayout.LayoutParams(dp(42), dp(42)));
 
-        // Lebar pencarian menyesuaikan ukuran layar.
+        // Kolom pencarian panjang, responsif, dan tetap di tengah.
         int screenWidth = getResources()
                 .getDisplayMetrics().widthPixels;
 
-        int sideSpace = dp(32);
-        int maxSearchWidth = dp(360);
+        int sideSpace = dp(16);
+        int maxSearchWidth = dp(380);
 
         int searchWidth = Math.min(
                 maxSearchWidth,
-                Math.max(dp(220), screenWidth - sideSpace * 2)
+                screenWidth - sideSpace * 2
         );
 
         LinearLayout.LayoutParams searchParams =
@@ -495,7 +500,7 @@ public class MainActivity extends Activity {
                 }
         );
 
-        // Area bawah beranda dibiarkan kosong.
+        // Area bawah tetap kosong.
         View bottomSpace = new View(this);
 
         homePanel.addView(bottomSpace,
