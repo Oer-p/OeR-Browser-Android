@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
     private LinearLayout homePanel;
     private LinearLayout htmlPanel;
     private FrameLayout contentFrame;
+    private Button accountButton;
 
     private final int black = Color.rgb(5, 5, 5);
     private final int dark = Color.rgb(23, 23, 23);
@@ -97,8 +98,7 @@ public class MainActivity extends Activity {
         button.setMinWidth(0);
         button.setMinimumWidth(0);
         button.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(dark)
-        );
+                android.content.res.ColorStateList.valueOf(dark));
         return button;
     }
 
@@ -263,35 +263,19 @@ public class MainActivity extends Activity {
         };
     }
 
-    // ==================== HEADER AKUN ====================
+    // ==================== TOMBOL AKUN ====================
 
     private void createHeader() {
-        LinearLayout header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.HORIZONTAL);
-        header.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-        header.setPadding(dp(20), dp(12), dp(16), dp(8));
-        header.setBackgroundColor(black);
-
-        Button account = makeButton("Akun");
-        account.setTextColor(green);
-        account.setTextSize(15);
-        account.setTypeface(null, Typeface.BOLD);
-        account.setGravity(Gravity.CENTER);
-        account.setPadding(dp(24), 0, dp(24), 0);
-        account.setMinHeight(0);
-        account.setMinimumHeight(0);
-        account.setBackground(rounded(dark, dp(24)));
-        account.setOnClickListener(v -> showAccountInfo());
-
-        header.addView(account, new LinearLayout.LayoutParams(
-                dp(100),
-                dp(44)
-        ));
-
-        root.addView(header, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(64)
-        ));
+        accountButton = makeButton("Akun");
+        accountButton.setTextColor(green);
+        accountButton.setTextSize(15);
+        accountButton.setTypeface(null, Typeface.BOLD);
+        accountButton.setGravity(Gravity.CENTER);
+        accountButton.setPadding(dp(24), 0, dp(24), 0);
+        accountButton.setMinHeight(0);
+        accountButton.setMinimumHeight(0);
+        accountButton.setBackground(rounded(dark, dp(28)));
+        accountButton.setOnClickListener(v -> showAccountInfo());
     }
 
     private void showAccountInfo() {
@@ -347,9 +331,9 @@ public class MainActivity extends Activity {
         navRow.setGravity(Gravity.CENTER);
         navRow.setBackgroundColor(black);
 
-        Button back = makeButton("鈥� Kembali");
-        Button refresh = makeButton("鈫� Muat ulang");
-        Button home = makeButton("鈱� Beranda");
+        Button back = makeButton("‹ Kembali");
+        Button refresh = makeButton("↻ Muat ulang");
+        Button home = makeButton("⌂ Beranda");
         Button editor = makeButton("</> HTML");
 
         navRow.addView(back,
@@ -385,24 +369,17 @@ public class MainActivity extends Activity {
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // ==================== BERANDA OoeR ====================
-
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
         View topSpace = new View(this);
-
         homePanel.addView(topSpace,
-                new LinearLayout.LayoutParams(
-                        1, 0, 0.9f
-                ));
+                new LinearLayout.LayoutParams(1, 0, 0.9f));
 
-        // Logo diperbesar, tetap satu.
         addLogo(homePanel, 76);
 
-        // Slogan didekatkan ke kolom pencarian.
         TextView subtitle = makeText(
                 "Jelajahi dunia dengan OoeR",
                 14,
@@ -422,17 +399,14 @@ public class MainActivity extends Activity {
         searchBar.setBackground(rounded(card, dp(32)));
 
         SearchIcon searchIcon = new SearchIcon();
-
         searchBar.addView(searchIcon,
                 new LinearLayout.LayoutParams(dp(36), dp(42)));
 
         homeSearchInput = makeInput("Cari apa");
-
         searchBar.addView(homeSearchInput,
                 new LinearLayout.LayoutParams(0, dp(56), 1));
 
         View mic = createMicIcon();
-
         searchBar.addView(mic,
                 new LinearLayout.LayoutParams(dp(34), dp(42)));
 
@@ -444,9 +418,8 @@ public class MainActivity extends Activity {
                 ).show()
         );
 
-        // Tombol pencarian hijau.
         Button sendBtn = new Button(this);
-        sendBtn.setText("鈫�");
+        sendBtn.setText("↑");
         sendBtn.setTextSize(20);
         sendBtn.setTypeface(null, Typeface.BOLD);
         sendBtn.setTextColor(Color.BLACK);
@@ -459,7 +432,6 @@ public class MainActivity extends Activity {
         searchBar.addView(sendBtn,
                 new LinearLayout.LayoutParams(dp(42), dp(42)));
 
-        // Kolom pencarian panjang, responsif, dan tetap di tengah.
         int screenWidth = getResources()
                 .getDisplayMetrics().widthPixels;
 
@@ -478,7 +450,6 @@ public class MainActivity extends Activity {
                 );
 
         searchParams.gravity = Gravity.CENTER_HORIZONTAL;
-
         homePanel.addView(searchBar, searchParams);
 
         sendBtn.setOnClickListener(
@@ -496,9 +467,7 @@ public class MainActivity extends Activity {
                 }
         );
 
-        // Area bawah tetap kosong.
         View bottomSpace = new View(this);
-
         homePanel.addView(bottomSpace,
                 new LinearLayout.LayoutParams(1, 0, 1.4f));
 
@@ -522,7 +491,6 @@ public class MainActivity extends Activity {
                 18,
                 green
         );
-
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -548,9 +516,7 @@ public class MainActivity extends Activity {
         );
 
         htmlPanel.addView(htmlInput,
-                new LinearLayout.LayoutParams(
-                        -1, 0, 1
-                ));
+                new LinearLayout.LayoutParams(-1, 0, 1));
 
         Button renderButton = makeButton("Tampilkan HTML");
         renderButton.setTextColor(green);
@@ -573,14 +539,10 @@ public class MainActivity extends Activity {
         resultScroll.addView(renderView);
 
         htmlPanel.addView(resultScroll,
-                new LinearLayout.LayoutParams(
-                        -1, 0, 1
-                ));
+                new LinearLayout.LayoutParams(-1, 0, 1));
 
         renderButton.setOnClickListener(v ->
-                renderView.renderHtml(
-                        htmlInput.getText().toString()
-                )
+                renderView.renderHtml(htmlInput.getText().toString())
         );
 
         // Pasang panel ke frame.
@@ -592,6 +554,21 @@ public class MainActivity extends Activity {
 
         contentFrame.addView(htmlPanel,
                 new FrameLayout.LayoutParams(-1, -1));
+
+        // Tombol Akun berada di sisi kiri, turun ke area tengah.
+        FrameLayout.LayoutParams accountParams =
+                new FrameLayout.LayoutParams(
+                        dp(100),
+                        dp(44),
+                        Gravity.TOP | Gravity.LEFT
+                );
+
+        accountParams.leftMargin = dp(20);
+        accountParams.topMargin = (int) (
+                getResources().getDisplayMetrics().heightPixels * 0.40f
+        );
+
+        contentFrame.addView(accountButton, accountParams);
 
         root.addView(contentFrame,
                 new LinearLayout.LayoutParams(-1, 0, 1));
@@ -605,6 +582,7 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.GONE);
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
+        accountButton.setVisibility(View.VISIBLE);
     }
 
     private void showBrowser() {
@@ -613,6 +591,7 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.GONE);
         addressRow.setVisibility(View.VISIBLE);
         navRow.setVisibility(View.VISIBLE);
+        accountButton.setVisibility(View.GONE);
     }
 
     private void showEditor() {
@@ -621,10 +600,9 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.VISIBLE);
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
+        accountButton.setVisibility(View.GONE);
 
-        renderView.renderHtml(
-                htmlInput.getText().toString()
-        );
+        renderView.renderHtml(htmlInput.getText().toString());
     }
 
     // ==================== PENCARIAN / ALAMAT ====================
@@ -690,7 +668,6 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.destroy();
         }
-
         super.onDestroy();
     }
 
@@ -756,7 +733,7 @@ public class MainActivity extends Activity {
                 } else if (line.startsWith("<li>")
                         && line.endsWith("</li>")) {
 
-                    tv.setText("鈥�  " + stripTags(line));
+                    tv.setText("•  " + stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(16, 3, 0, 3);
 
