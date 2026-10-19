@@ -267,34 +267,30 @@ public class MainActivity extends Activity {
 
     private void createHeader() {
         LinearLayout header = new LinearLayout(this);
-
         header.setOrientation(LinearLayout.HORIZONTAL);
-        header.setGravity(
-                Gravity.LEFT | Gravity.CENTER_VERTICAL
-        );
-
-        // Akun di kiri, tidak menempel tepi dan sedikit turun.
-        header.setPadding(dp(16), dp(55), dp(8), 0);
+        header.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        header.setPadding(dp(20), dp(12), dp(16), dp(8));
         header.setBackgroundColor(black);
 
         Button account = makeButton("Akun");
         account.setTextColor(green);
-        account.setTextSize(14);
-        account.setPadding(dp(18), 0, dp(18), 0);
+        account.setTextSize(15);
+        account.setTypeface(null, Typeface.BOLD);
+        account.setGravity(Gravity.CENTER);
+        account.setPadding(dp(24), 0, dp(24), 0);
         account.setMinHeight(0);
         account.setMinimumHeight(0);
-        account.setBackground(rounded(dark, dp(40)));
-
+        account.setBackground(rounded(dark, dp(24)));
         account.setOnClickListener(v -> showAccountInfo());
 
         header.addView(account, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                dp(40)
+                dp(100),
+                dp(44)
         ));
 
         root.addView(header, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(66)
+                dp(64)
         ));
     }
 
@@ -351,9 +347,9 @@ public class MainActivity extends Activity {
         navRow.setGravity(Gravity.CENTER);
         navRow.setBackgroundColor(black);
 
-        Button back = makeButton("‹ Kembali");
-        Button refresh = makeButton("↻ Muat ulang");
-        Button home = makeButton("⌂ Beranda");
+        Button back = makeButton("鈥� Kembali");
+        Button refresh = makeButton("鈫� Muat ulang");
+        Button home = makeButton("鈱� Beranda");
         Button editor = makeButton("</> HTML");
 
         navRow.addView(back,
@@ -450,7 +446,7 @@ public class MainActivity extends Activity {
 
         // Tombol pencarian hijau.
         Button sendBtn = new Button(this);
-        sendBtn.setText("↑");
+        sendBtn.setText("鈫�");
         sendBtn.setTextSize(20);
         sendBtn.setTypeface(null, Typeface.BOLD);
         sendBtn.setTextColor(Color.BLACK);
@@ -760,7 +756,7 @@ public class MainActivity extends Activity {
                 } else if (line.startsWith("<li>")
                         && line.endsWith("</li>")) {
 
-                    tv.setText("•  " + stripTags(line));
+                    tv.setText("鈥�  " + stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(16, 3, 0, 3);
 
