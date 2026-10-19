@@ -25,7 +25,34 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class MainActivity extends Activity {
+
+    private static final String SUPABASE_URL =
+            "https://jhopfzmyxuafdbwwkjbf.supabase.co";
+
+    private static final String SUPABASE_KEY =
+            "sb_publishable_FE4-8ZuWD3FgKCcjxjaErg_w97N3fwk";
+
+    private static final String PREFS = "oer_auth";
+    private static final String ACCESS = "access_token";
+    private static final String REFRESH = "refresh_token";
+    private static final String EMAIL = "email";
+
+    private final ExecutorService executor =
+            Executors.newSingleThreadExecutor();
 
     private EditText addressInput;
     private EditText homeSearchInput;
@@ -66,6 +93,7 @@ public class MainActivity extends Activity {
         createContent();
 
         setContentView(root);
+        updateAccountButton();
         showHome();
     }
 
@@ -115,10 +143,9 @@ public class MainActivity extends Activity {
         return input;
     }
 
-    // ==================== LOGO OeR ====================
+    // ==================== LOGO ====================
 
     private class RainbowTextView extends TextView {
-
         public RainbowTextView(String text, int size) {
             super(MainActivity.this);
             setText(text);
@@ -145,7 +172,6 @@ public class MainActivity extends Activity {
                         Shader.TileMode.CLAMP
                 ));
             }
-
             super.onDraw(canvas);
             getPaint().setShader(null);
         }
@@ -168,16 +194,13 @@ public class MainActivity extends Activity {
         r.setIncludeFontPadding(false);
         logo.addView(r);
 
-        logo.setGravity(Gravity.CENTER);
         parent.addView(logo);
     }
 
-    // ==================== IKON PENCARIAN ====================
+    // ==================== IKON ====================
 
     private class SearchIcon extends View {
-
-        private final Paint paint =
-                new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public SearchIcon() {
             super(MainActivity.this);
@@ -185,12 +208,9 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
             float cx = getWidth() * 0.42f;
             float cy = getHeight() * 0.42f;
-            float radius =
-                    Math.min(getWidth(), getHeight()) * 0.28f;
+            float radius = Math.min(getWidth(), getHeight()) * 0.28f;
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(dp(2));
@@ -198,7 +218,6 @@ public class MainActivity extends Activity {
             paint.setColor(Color.rgb(180, 180, 180));
 
             canvas.drawCircle(cx, cy, radius, paint);
-
             canvas.drawLine(
                     cx + radius * 0.72f,
                     cy + radius * 0.72f,
@@ -209,18 +228,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ==================== IKON MIKROFON ====================
-
     private View createMicIcon() {
         return new View(this) {
-
             private final Paint paint =
                     new Paint(Paint.ANTI_ALIAS_FLAG);
 
             @Override
             protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-
                 float cx = getWidth() / 2f;
                 float cy = getHeight() / 2f - dp(1);
 
@@ -230,46 +244,30 @@ public class MainActivity extends Activity {
                 paint.setStrokeCap(Paint.Cap.ROUND);
 
                 canvas.drawRoundRect(
-                        cx - dp(5.5f),
-                        cy - dp(11),
-                        cx + dp(5.5f),
-                        cy + dp(4),
-                        dp(6),
-                        dp(6),
-                        paint
+                        cx - dp(5.5f), cy - dp(11),
+                        cx + dp(5.5f), cy + dp(4),
+                        dp(6), dp(6), paint
                 );
-
                 canvas.drawArc(
-                        cx - dp(11),
-                        cy - dp(5),
-                        cx + dp(11),
-                        cy + dp(13),
-                        0,
-                        180,
-                        false,
-                        paint
+                        cx - dp(11), cy - dp(5),
+                        cx + dp(11), cy + dp(13),
+                        0, 180, false, paint
                 );
-
                 canvas.drawLine(
-                        cx, cy + dp(13),
-                        cx, cy + dp(18),
-                        paint
+                        cx, cy + dp(13), cx, cy + dp(18), paint
                 );
-
                 canvas.drawLine(
                         cx - dp(6), cy + dp(18),
-                        cx + dp(6), cy + dp(18),
-                        paint
+                        cx + dp(6), cy + dp(18), paint
                 );
             }
         };
     }
 
-    // ==================== TOMBOL AKUN ====================
+    // ==================== AKUN SUPABASE ====================
 
     private void createHeader() {
         accountButton = makeButton("Akun");
-
         accountButton.setTextColor(green);
         accountButton.setTextSize(15);
         accountButton.setTypeface(null, Typeface.BOLD);
@@ -278,20 +276,268 @@ public class MainActivity extends Activity {
         accountButton.setMinHeight(0);
         accountButton.setMinimumHeight(0);
         accountButton.setBackground(rounded(dark, 28));
-
-        accountButton.setOnClickListener(v -> showAccountInfo());
+        accountButton.setOnClickListener(v -> showAccountDialog());
     }
 
-    private void showAccountInfo() {
+    private String saved(String key) {
+        return getSharedPreferences(PREFS, MODE_PRIVATE)
+                .getString(key, "");
+    }
+
+    private void updateAccountButton() {
+        String email = saved(EMAIL);
+        accountButton.setText(
+                email.isEmpty() ? "Akun" : "Akun ✓"
+        );
+    }
+
+    private void showAccountDialog() {
+        String email = saved(EMAIL);
+
+        if (!email.isEmpty() && !saved(ACCESS).isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Akun OeR")
+                    .setMessage("Login sebagai:\n" + email)
+                    .setPositiveButton("Keluar", (d, w) -> logout())
+                    .setNegativeButton("Tutup", null)
+                    .show();
+            return;
+        }
+
+        String[] options = {
+                "Login",
+                "Daftar akun",
+                "Login dengan Google"
+        };
+
         new AlertDialog.Builder(this)
                 .setTitle("Akun OeR")
-                .setMessage(
-                        "Fitur akun OeR sedang disiapkan.\n\n" +
-                        "Login dan pendaftaran akan dihubungkan " +
-                        "setelah konfigurasi Supabase dipastikan."
-                )
-                .setPositiveButton("Mengerti", null)
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        showEmailForm(false);
+                    } else if (which == 1) {
+                        showEmailForm(true);
+                    } else {
+                        startGoogleLogin();
+                    }
+                })
+                .setNegativeButton("Batal", null)
                 .show();
+    }
+
+    private void showEmailForm(boolean signup) {
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(dp(22), dp(8), dp(22), dp(4));
+
+        EditText emailInput = new EditText(this);
+        emailInput.setSingleLine(true);
+        emailInput.setHint("Email");
+        emailInput.setInputType(
+                android.text.InputType.TYPE_CLASS_TEXT
+                        | android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        );
+        form.addView(emailInput);
+
+        EditText passwordInput = new EditText(this);
+        passwordInput.setSingleLine(true);
+        passwordInput.setHint("Kata sandi");
+        passwordInput.setInputType(
+                android.text.InputType.TYPE_CLASS_TEXT
+                        | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+        );
+        form.addView(passwordInput);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(signup ? "Daftar akun OeR" : "Login OeR")
+                .setView(form)
+                .setPositiveButton(signup ? "Daftar" : "Login", null)
+                .setNegativeButton("Batal", null)
+                .create();
+
+        dialog.setOnShowListener(d -> dialog.getButton(
+                AlertDialog.BUTTON_POSITIVE
+        ).setOnClickListener(v -> {
+            String email = emailInput.getText().toString().trim();
+            String password = passwordInput.getText().toString();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this,
+                        "Email dan kata sandi wajib diisi",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 6) {
+                Toast.makeText(this,
+                        "Kata sandi minimal 6 karakter",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            emailAuth(email, password, signup);
+        }));
+
+        dialog.show();
+    }
+
+    private void emailAuth(
+            String email, String password, boolean signup
+    ) {
+        Toast.makeText(this, "Menghubungkan ke Supabase...",
+                Toast.LENGTH_SHORT).show();
+
+        executor.execute(() -> {
+            HttpURLConnection connection = null;
+
+            try {
+                String endpoint = signup
+                        ? "/auth/v1/signup"
+                        : "/auth/v1/token?grant_type=password";
+
+                URL url = new URL(SUPABASE_URL + endpoint);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(15000);
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type",
+                        "application/json");
+                connection.setRequestProperty("apikey", SUPABASE_KEY);
+
+                JSONObject body = new JSONObject();
+                body.put("email", email);
+                body.put("password", password);
+
+                byte[] bytes = body.toString().getBytes(
+                        StandardCharsets.UTF_8);
+
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write(bytes);
+                }
+
+                int status = connection.getResponseCode();
+                InputStream stream = status >= 200 && status < 300
+                        ? connection.getInputStream()
+                        : connection.getErrorStream();
+
+                String response = readStream(stream);
+                JSONObject json = new JSONObject(response);
+
+                if (status >= 200 && status < 300) {
+                    String access = json.optString("access_token", "");
+                    String refresh = json.optString("refresh_token", "");
+
+                    if (!access.isEmpty()) {
+                        getSharedPreferences(PREFS, MODE_PRIVATE)
+                                .edit()
+                                .putString(ACCESS, access)
+                                .putString(REFRESH, refresh)
+                                .putString(EMAIL, email)
+                                .apply();
+
+                        runOnUiThread(() -> {
+                            updateAccountButton();
+                            Toast.makeText(this,
+                                    "Login berhasil",
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    } else if (signup) {
+                        runOnUiThread(() -> new AlertDialog.Builder(this)
+                                .setTitle("Periksa email")
+                                .setMessage(
+                                        "Pendaftaran diterima. Jika konfirmasi " +
+                                        "email diaktifkan di Supabase, buka email " +
+                                        "untuk mengonfirmasi akun lalu login."
+                                )
+                                .setPositiveButton("Mengerti", null)
+                                .show());
+                    } else {
+                        showAuthError(
+                                "Login belum menghasilkan sesi. Periksa email " +
+                                "dan pengaturan autentikasi Supabase."
+                        );
+                    }
+                } else {
+                    String message = json.optString("msg",
+                            json.optString("message",
+                                    json.optString("error_description",
+                                            "Permintaan gagal (" + status + ")")));
+                    showAuthError(message);
+                }
+
+            } catch (Exception e) {
+                showAuthError(
+                        "Tidak dapat terhubung. Periksa internet dan konfigurasi Supabase."
+                );
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        });
+    }
+
+    private String readStream(InputStream stream) throws Exception {
+        if (stream == null) return "{}";
+
+        StringBuilder result = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+        }
+
+        return result.toString();
+    }
+
+    private void showAuthError(String message) {
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle("Autentikasi gagal")
+                .setMessage(message)
+                .setPositiveButton("Tutup", null)
+                .show());
+    }
+
+    private void logout() {
+        getSharedPreferences(PREFS, MODE_PRIVATE)
+                .edit().clear().apply();
+
+        updateAccountButton();
+
+        Toast.makeText(this, "Kamu telah keluar dari akun",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void startGoogleLogin() {
+        try {
+            String redirect = "id.oer.browser://login-callback/";
+            String url = SUPABASE_URL
+                    + "/auth/v1/authorize?provider=google"
+                    + "&redirect_to="
+                    + URLEncoder.encode(redirect, "UTF-8");
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Login Google")
+                    .setMessage(
+                            "Login Google belum menyimpan sesi otomatis " +
+                            "pada versi ini. Integrasi PKCE dan callback " +
+                            "perlu ditambahkan sebelum fitur ini siap digunakan."
+                    )
+                    .setPositiveButton("Buka login", (d, w) -> {
+                        showBrowser();
+                        addressInput.setText(url);
+                        webView.loadUrl(url);
+                    })
+                    .setNegativeButton("Batal", null)
+                    .show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Gagal membuka login Google",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     // ==================== ADDRESS BAR ====================
@@ -303,32 +549,28 @@ public class MainActivity extends Activity {
         addressRow.setBackgroundColor(black);
 
         addressInput = makeInput("Cari atau masukkan alamat...");
-
         addressRow.addView(addressInput,
                 new LinearLayout.LayoutParams(0, dp(48), 1));
 
         Button open = makeButton("Buka");
         open.setTextColor(green);
         addressRow.addView(open);
-
         open.setOnClickListener(v -> openAddress(addressInput));
 
-        addressInput.setOnEditorActionListener(
-                (v, actionId, event) -> {
-                    if (actionId == EditorInfo.IME_ACTION_GO
-                            || actionId == EditorInfo.IME_ACTION_DONE) {
-                        openAddress(addressInput);
-                        return true;
-                    }
-                    return false;
-                }
-        );
+        addressInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_GO
+                    || actionId == EditorInfo.IME_ACTION_DONE) {
+                openAddress(addressInput);
+                return true;
+            }
+            return false;
+        });
 
         root.addView(addressRow);
         addressRow.setVisibility(View.GONE);
     }
 
-    // ==================== NAVIGASI BROWSER ====================
+    // ==================== NAVIGASI ====================
 
     private void createNavigation() {
         navRow = new LinearLayout(this);
@@ -340,24 +582,14 @@ public class MainActivity extends Activity {
         Button home = makeButton("⌂ Beranda");
         Button editor = makeButton("</> HTML");
 
-        navRow.addView(back,
-                new LinearLayout.LayoutParams(0, dp(48), 1));
-
-        navRow.addView(refresh,
-                new LinearLayout.LayoutParams(0, dp(48), 1));
-
-        navRow.addView(home,
-                new LinearLayout.LayoutParams(0, dp(48), 1));
-
-        navRow.addView(editor,
-                new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(back, new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(refresh, new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(home, new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(editor, new LinearLayout.LayoutParams(0, dp(48), 1));
 
         back.setOnClickListener(v -> {
-            if (webView.canGoBack()) {
-                webView.goBack();
-            } else {
-                showHome();
-            }
+            if (webView.canGoBack()) webView.goBack();
+            else showHome();
         });
 
         refresh.setOnClickListener(v -> webView.reload());
@@ -368,7 +600,7 @@ public class MainActivity extends Activity {
         navRow.setVisibility(View.GONE);
     }
 
-    // ==================== KONTEN UTAMA ====================
+    // ==================== KONTEN ====================
 
     private void createContent() {
         contentFrame = new FrameLayout(this);
@@ -378,60 +610,39 @@ public class MainActivity extends Activity {
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
-        // Ruang atas dan bawah seimbang agar logo dan pencarian
-        // berada di area tengah layar.
         View topSpace = new View(this);
         homePanel.addView(topSpace,
-                new LinearLayout.LayoutParams(
-                        1, 0, 1f
-                ));
+                new LinearLayout.LayoutParams(1, 0, 1f));
 
         addLogo(homePanel, 76);
 
         TextView subtitle = makeText(
-                "Jelajahi dunia dengan OeR",
-                14,
-                gray
-        );
-
+                "Jelajahi dunia dengan OeR", 14, gray);
         subtitle.setGravity(Gravity.CENTER);
         subtitle.setPadding(0, dp(8), 0, dp(16));
         homePanel.addView(subtitle);
-
-        // ==================== KOLOM PENCARIAN ====================
 
         LinearLayout searchBar = new LinearLayout(this);
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
         searchBar.setPadding(dp(12), 0, dp(10), 0);
         searchBar.setBackground(rounded(card, 32));
-        searchBar.setClipToPadding(false);
 
         SearchIcon searchIcon = new SearchIcon();
-
         searchBar.addView(searchIcon,
                 new LinearLayout.LayoutParams(dp(32), dp(42)));
 
         homeSearchInput = makeInput("Cari apa");
-
         homeSearchInput.setPadding(dp(6), 0, dp(4), 0);
-        homeSearchInput.setTextSize(16);
-
         searchBar.addView(homeSearchInput,
                 new LinearLayout.LayoutParams(0, dp(54), 1));
 
         View mic = createMicIcon();
-
         searchBar.addView(mic,
                 new LinearLayout.LayoutParams(dp(34), dp(42)));
-
-        mic.setOnClickListener(v ->
-                Toast.makeText(
-                        MainActivity.this,
-                        "Fitur mikrofon akan dikembangkan",
-                        Toast.LENGTH_SHORT
-                ).show()
-        );
+        mic.setOnClickListener(v -> Toast.makeText(this,
+                "Fitur mikrofon akan dikembangkan",
+                Toast.LENGTH_SHORT).show());
 
         Button sendBtn = new Button(this);
         sendBtn.setText("↑");
@@ -445,45 +656,30 @@ public class MainActivity extends Activity {
         sendBtn.setMinimumWidth(0);
         sendBtn.setMinimumHeight(0);
         sendBtn.setBackground(rounded(green, 22));
-
         sendBtn.setStateListAnimator(null);
 
         searchBar.addView(sendBtn,
                 new LinearLayout.LayoutParams(dp(42), dp(42)));
 
-        // MATCH_PARENT dan margin DP mencegah kolom pencarian
-        // terpotong akibat perbedaan satuan pixel dan dp.
         LinearLayout.LayoutParams searchParams =
                 new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        dp(64)
-                );
-
+                        ViewGroup.LayoutParams.MATCH_PARENT, dp(64));
         searchParams.setMargins(dp(16), 0, dp(16), 0);
         homePanel.addView(searchBar, searchParams);
 
-        sendBtn.setOnClickListener(
-                v -> openAddress(homeSearchInput)
-        );
-
-        homeSearchInput.setOnEditorActionListener(
-                (v, actionId, event) -> {
-                    if (actionId == EditorInfo.IME_ACTION_GO
-                            || actionId == EditorInfo.IME_ACTION_DONE) {
-                        openAddress(homeSearchInput);
-                        return true;
-                    }
-                    return false;
-                }
-        );
+        sendBtn.setOnClickListener(v -> openAddress(homeSearchInput));
+        homeSearchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_GO
+                    || actionId == EditorInfo.IME_ACTION_DONE) {
+                openAddress(homeSearchInput);
+                return true;
+            }
+            return false;
+        });
 
         View bottomSpace = new View(this);
         homePanel.addView(bottomSpace,
-                new LinearLayout.LayoutParams(
-                        1, 0, 1f
-                ));
-
-        // ==================== WEBVIEW ====================
+                new LinearLayout.LayoutParams(1, 0, 1f));
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
@@ -491,19 +687,12 @@ public class MainActivity extends Activity {
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
-        // ==================== EDITOR HTML ====================
-
         htmlPanel = new LinearLayout(this);
         htmlPanel.setOrientation(LinearLayout.VERTICAL);
         htmlPanel.setPadding(dp(16), dp(12), dp(16), dp(12));
         htmlPanel.setBackgroundColor(black);
 
-        TextView htmlTitle = makeText(
-                "Editor HTML OeR",
-                18,
-                green
-        );
-
+        TextView htmlTitle = makeText("Editor HTML OeR", 18, green);
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -514,17 +703,12 @@ public class MainActivity extends Activity {
         htmlInput.setMinLines(5);
         htmlInput.setPadding(dp(14), dp(14), dp(14), dp(14));
         htmlInput.setBackground(rounded(dark, 12));
-
         htmlInput.setText(
                 "<h1>Selamat datang di OeR</h1>\n" +
                 "<p>Ini adalah mesin render HTML OeR.</p>\n" +
                 "<h2>Fitur awal</h2>\n" +
-                "<ul>\n" +
-                "<li>Judul</li>\n" +
-                "<li>Paragraf</li>\n" +
-                "<li>Daftar</li>\n" +
-                "</ul>\n" +
-                "<hr>\n" +
+                "<ul>\n<li>Judul</li>\n<li>Paragraf</li>\n" +
+                "<li>Daftar</li>\n</ul>\n<hr>\n" +
                 "<p>Mesin akan terus dikembangkan.</p>"
         );
 
@@ -535,12 +719,7 @@ public class MainActivity extends Activity {
         renderButton.setTextColor(green);
         htmlPanel.addView(renderButton);
 
-        TextView resultTitle = makeText(
-                "Hasil render:",
-                15,
-                white
-        );
-
+        TextView resultTitle = makeText("Hasil render:", 15, white);
         resultTitle.setPadding(0, dp(12), 0, dp(8));
         htmlPanel.addView(resultTitle);
 
@@ -550,37 +729,24 @@ public class MainActivity extends Activity {
 
         renderView = new OeRRenderView(this);
         resultScroll.addView(renderView);
-
         htmlPanel.addView(resultScroll,
                 new LinearLayout.LayoutParams(-1, 0, 1));
 
         renderButton.setOnClickListener(v ->
-                renderView.renderHtml(htmlInput.getText().toString())
-        );
-
-        // ==================== PASANG PANEL ====================
+                renderView.renderHtml(htmlInput.getText().toString()));
 
         contentFrame.addView(homePanel,
                 new FrameLayout.LayoutParams(-1, -1));
-
         contentFrame.addView(webView,
                 new FrameLayout.LayoutParams(-1, -1));
-
         contentFrame.addView(htmlPanel,
                 new FrameLayout.LayoutParams(-1, -1));
 
-        // Akun berada di kiri atas area konten.
-        // Area konten sudah berada di bawah status bar Android.
         FrameLayout.LayoutParams accountParams =
                 new FrameLayout.LayoutParams(
-                        dp(100),
-                        dp(44),
-                        Gravity.TOP | Gravity.LEFT
-                );
-
+                        dp(100), dp(44), Gravity.TOP | Gravity.LEFT);
         accountParams.leftMargin = dp(16);
         accountParams.topMargin = dp(12);
-
         contentFrame.addView(accountButton, accountParams);
 
         root.addView(contentFrame,
@@ -614,21 +780,17 @@ public class MainActivity extends Activity {
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
         accountButton.setVisibility(View.GONE);
-
         renderView.renderHtml(htmlInput.getText().toString());
     }
 
-    // ==================== PENCARIAN / ALAMAT ====================
+    // ==================== PENCARIAN ====================
 
     private void openAddress(EditText input) {
         String query = input.getText().toString().trim();
 
         if (query.isEmpty()) {
-            Toast.makeText(
-                    this,
-                    "Masukkan alamat atau pencarian",
-                    Toast.LENGTH_SHORT
-            ).show();
+            Toast.makeText(this, "Masukkan alamat atau pencarian",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -637,19 +799,15 @@ public class MainActivity extends Activity {
         if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
             url = query;
         } else if (query.matches(
-                "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$"
-        )) {
+                "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
             url = "https://" + query;
         } else {
             try {
-                url = "https://www.google.com/search?q=" +
-                        java.net.URLEncoder.encode(query, "UTF-8");
+                url = "https://www.google.com/search?q="
+                        + URLEncoder.encode(query, "UTF-8");
             } catch (Exception e) {
-                Toast.makeText(
-                        this,
-                        "Pencarian gagal",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(this, "Pencarian gagal",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -659,18 +817,15 @@ public class MainActivity extends Activity {
         webView.loadUrl(url);
     }
 
-    // ==================== TOMBOL KEMBALI HP ====================
+    // ==================== KEMBALI ====================
 
     @Override
     public void onBackPressed() {
         if (htmlPanel.getVisibility() == View.VISIBLE) {
             showHome();
         } else if (webView.getVisibility() == View.VISIBLE) {
-            if (webView.canGoBack()) {
-                webView.goBack();
-            } else {
-                showHome();
-            }
+            if (webView.canGoBack()) webView.goBack();
+            else showHome();
         } else {
             super.onBackPressed();
         }
@@ -678,19 +833,15 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (webView != null) {
-            webView.destroy();
-        }
+        executor.shutdownNow();
+        if (webView != null) webView.destroy();
         super.onDestroy();
     }
 
-    // ==================== RENDERER HTML SEDERHANA ====================
+    // ==================== RENDERER HTML ====================
 
     private static class OeRRenderView extends LinearLayout {
-
-        public OeRRenderView(
-                android.content.Context context
-        ) {
+        public OeRRenderView(android.content.Context context) {
             super(context);
             setOrientation(VERTICAL);
             setPadding(8, 8, 8, 8);
@@ -711,76 +862,49 @@ public class MainActivity extends Activity {
 
             for (String raw : lines) {
                 String line = raw.trim();
-
-                if (line.isEmpty()) {
-                    continue;
-                }
+                if (line.isEmpty()) continue;
 
                 TextView tv = new TextView(getContext());
                 tv.setTextColor(Color.BLACK);
                 tv.setPadding(0, 4, 0, 4);
 
-                if (line.startsWith("<h1>")
-                        && line.endsWith("</h1>")) {
-
+                if (line.startsWith("<h1>") && line.endsWith("</h1>")) {
                     tv.setText(stripTags(line));
                     tv.setTextSize(24);
                     tv.setTypeface(null, Typeface.BOLD);
                     tv.setPadding(0, 12, 0, 8);
-
                 } else if (line.startsWith("<h2>")
                         && line.endsWith("</h2>")) {
-
                     tv.setText(stripTags(line));
                     tv.setTextSize(20);
                     tv.setTypeface(null, Typeface.BOLD);
                     tv.setPadding(0, 10, 0, 6);
-
                 } else if (line.startsWith("<p>")
                         && line.endsWith("</p>")) {
-
                     tv.setText(stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(0, 6, 0, 6);
-
                 } else if (line.startsWith("<li>")
                         && line.endsWith("</li>")) {
-
                     tv.setText("•  " + stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(16, 3, 0, 3);
-
                 } else if (line.equals("<hr>")
                         || line.equals("<hr/>")
                         || line.equals("<hr />")) {
-
                     View lineView = new View(getContext());
-                    lineView.setBackgroundColor(
-                            Color.rgb(200, 200, 200)
-                    );
-
-                    addView(lineView,
-                            new LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    2
-                            ));
-
+                    lineView.setBackgroundColor(Color.rgb(200, 200, 200));
+                    addView(lineView, new LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, 2));
                     continue;
-
                 } else if (line.startsWith("<ul>")
                         || line.startsWith("</ul>")
                         || line.startsWith("<ol>")
                         || line.startsWith("</ol>")) {
-
                     continue;
-
                 } else {
                     String clean = stripTags(line);
-
-                    if (clean.isEmpty()) {
-                        continue;
-                    }
-
+                    if (clean.isEmpty()) continue;
                     tv.setText(clean);
                     tv.setTextSize(15);
                 }
