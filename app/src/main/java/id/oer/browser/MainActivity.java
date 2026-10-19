@@ -1,3 +1,4 @@
+
 package id.oer.browser;
 
 import android.app.Activity;
@@ -51,6 +52,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().setStatusBarColor(black);
+        getWindow().setNavigationBarColor(black);
+
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(black);
@@ -62,6 +66,11 @@ public class MainActivity extends Activity {
 
         setContentView(root);
         showHome();
+    }
+
+    private int dp(float value) {
+        return (int) (value * getResources()
+                .getDisplayMetrics().density + 0.5f);
     }
 
     private GradientDrawable rounded(int color, float radius) {
@@ -87,7 +96,9 @@ public class MainActivity extends Activity {
         button.setAllCaps(false);
         button.setMinWidth(0);
         button.setMinimumWidth(0);
-        button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(dark));
+        button.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(dark)
+        );
         return button;
     }
 
@@ -98,13 +109,16 @@ public class MainActivity extends Activity {
         input.setTextColor(white);
         input.setHintTextColor(gray);
         input.setHint(hint);
-        input.setPadding(4, 0, 4, 0);
+        input.setPadding(dp(4), 0, dp(4), 0);
         input.setBackgroundColor(Color.TRANSPARENT);
         input.setImeOptions(EditorInfo.IME_ACTION_GO);
         return input;
     }
 
+    // ==================== LOGO OoeR ====================
+
     private class RainbowTextView extends TextView {
+
         public RainbowTextView(String text, int size) {
             super(MainActivity.this);
             setText(text);
@@ -131,6 +145,7 @@ public class MainActivity extends Activity {
                         Shader.TileMode.CLAMP
                 ));
             }
+
             super.onDraw(canvas);
             getPaint().setShader(null);
         }
@@ -156,8 +171,12 @@ public class MainActivity extends Activity {
         parent.addView(logo);
     }
 
+    // ==================== IKON PENCARIAN ====================
+
     private class SearchIcon extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        private final Paint paint =
+                new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public SearchIcon() {
             super(MainActivity.this);
@@ -166,101 +185,164 @@ public class MainActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+
             float cx = getWidth() * 0.42f;
             float cy = getHeight() * 0.42f;
-            float radius = Math.min(getWidth(), getHeight()) * 0.28f;
+            float radius =
+                    Math.min(getWidth(), getHeight()) * 0.28f;
 
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(3.8f);
+            paint.setStrokeWidth(dp(2));
             paint.setColor(Color.rgb(180, 180, 180));
 
             canvas.drawCircle(cx, cy, radius, paint);
+
             canvas.drawLine(
-                    cx + radius * 0.72f, cy + radius * 0.72f,
-                    cx + radius * 1.45f, cy + radius * 1.45f,
+                    cx + radius * 0.72f,
+                    cy + radius * 0.72f,
+                    cx + radius * 1.45f,
+                    cy + radius * 1.45f,
                     paint
             );
         }
     }
 
+    // ==================== IKON MIKROFON ====================
+
     private View createMicIcon() {
         return new View(this) {
-            private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+            private final Paint paint =
+                    new Paint(Paint.ANTI_ALIAS_FLAG);
 
             @Override
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
+
                 float cx = getWidth() / 2f;
-                float cy = getHeight() / 2f - 1;
+                float cy = getHeight() / 2f - dp(1);
 
                 paint.setColor(Color.rgb(180, 180, 180));
                 paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(2.4f);
+                paint.setStrokeWidth(dp(2));
                 paint.setStrokeCap(Paint.Cap.ROUND);
 
-                canvas.drawRoundRect(cx - 5.5f, cy - 11, cx + 5.5f, cy + 4, 6, 6, paint);
-                canvas.drawArc(cx - 11, cy - 5, cx + 11, cy + 13, 0, 180, false, paint);
-                canvas.drawLine(cx, cy + 13, cx, cy + 18, paint);
-                canvas.drawLine(cx - 6, cy + 18, cx + 6, cy + 18, paint);
+                canvas.drawRoundRect(
+                        cx - dp(5.5f),
+                        cy - dp(11),
+                        cx + dp(5.5f),
+                        cy + dp(4),
+                        dp(6),
+                        dp(6),
+                        paint
+                );
+
+                canvas.drawArc(
+                        cx - dp(11),
+                        cy - dp(5),
+                        cx + dp(11),
+                        cy + dp(13),
+                        0,
+                        180,
+                        false,
+                        paint
+                );
+
+                canvas.drawLine(
+                        cx, cy + dp(13),
+                        cx, cy + dp(18),
+                        paint
+                );
+
+                canvas.drawLine(
+                        cx - dp(6), cy + dp(18),
+                        cx + dp(6), cy + dp(18),
+                        paint
+                );
             }
         };
     }
 
+    // ==================== HEADER AKUN ====================
+
     private void createHeader() {
         LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        header.setPadding(0, 20, 18, 0);
+
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(
+                Gravity.RIGHT | Gravity.CENTER_VERTICAL
+        );
+        header.setPadding(dp(8), 0, dp(18), 0);
         header.setBackgroundColor(black);
 
         Button account = makeButton("Akun");
         account.setTextColor(green);
         account.setTextSize(14);
-        account.setPadding(18, 0, 18, 0);
+        account.setPadding(dp(18), 0, dp(18), 0);
         account.setMinHeight(0);
         account.setMinimumHeight(0);
-        account.setBackground(rounded(dark, 40));
+        account.setBackground(rounded(dark, dp(40)));
+
         account.setOnClickListener(v -> showAccountInfo());
 
         header.addView(account, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, 40
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                dp(40)
         ));
 
-        root.addView(header, new LinearLayout.LayoutParams(-1, 60));
+        root.addView(header, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(56)
+        ));
     }
 
     private void showAccountInfo() {
         new AlertDialog.Builder(this)
                 .setTitle("Akun OoeR")
-                .setMessage("Fitur akun OoeR sedang disiapkan.\n\nLogin dan pendaftaran akan dihubungkan setelah konfigurasi Supabase dipastikan.")
+                .setMessage(
+                        "Fitur akun OoeR sedang disiapkan.\n\n" +
+                        "Login dan pendaftaran akan dihubungkan " +
+                        "setelah konfigurasi Supabase dipastikan."
+                )
                 .setPositiveButton("Mengerti", null)
                 .show();
     }
 
+    // ==================== ADDRESS BAR ====================
+
     private void createAddressBar() {
         addressRow = new LinearLayout(this);
         addressRow.setGravity(Gravity.CENTER_VERTICAL);
-        addressRow.setPadding(12, 6, 12, 6);
+        addressRow.setPadding(dp(12), dp(6), dp(12), dp(6));
         addressRow.setBackgroundColor(black);
 
         addressInput = makeInput("Cari atau masukkan alamat...");
-        addressRow.addView(addressInput, new LinearLayout.LayoutParams(0, 48, 1));
+
+        addressRow.addView(addressInput,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
 
         Button open = makeButton("Buka");
         open.setTextColor(green);
         addressRow.addView(open);
 
         open.setOnClickListener(v -> openAddress(addressInput));
-        addressInput.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE) {
-                openAddress(addressInput);
-                return true;
-            }
-            return false;
-        });
+
+        addressInput.setOnEditorActionListener(
+                (v, actionId, event) -> {
+                    if (actionId == EditorInfo.IME_ACTION_GO
+                            || actionId == EditorInfo.IME_ACTION_DONE) {
+                        openAddress(addressInput);
+                        return true;
+                    }
+                    return false;
+                }
+        );
 
         root.addView(addressRow);
         addressRow.setVisibility(View.GONE);
     }
+
+    // ==================== NAVIGASI BROWSER ====================
 
     private void createNavigation() {
         navRow = new LinearLayout(this);
@@ -272,15 +354,26 @@ public class MainActivity extends Activity {
         Button home = makeButton("⌂ Beranda");
         Button editor = makeButton("</> HTML");
 
-        navRow.addView(back, new LinearLayout.LayoutParams(0, 48, 1));
-        navRow.addView(refresh, new LinearLayout.LayoutParams(0, 48, 1));
-        navRow.addView(home, new LinearLayout.LayoutParams(0, 48, 1));
-        navRow.addView(editor, new LinearLayout.LayoutParams(0, 48, 1));
+        navRow.addView(back,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+
+        navRow.addView(refresh,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+
+        navRow.addView(home,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+
+        navRow.addView(editor,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
 
         back.setOnClickListener(v -> {
-            if (webView.canGoBack()) webView.goBack();
-            else showHome();
+            if (webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                showHome();
+            }
         });
+
         refresh.setOnClickListener(v -> webView.reload());
         home.setOnClickListener(v -> showHome());
         editor.setOnClickListener(v -> showEditor());
@@ -289,105 +382,146 @@ public class MainActivity extends Activity {
         navRow.setVisibility(View.GONE);
     }
 
+    // ==================== KONTEN UTAMA ====================
+
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // HOME
+        // Beranda OoeR
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setBackgroundColor(black);
 
         View topSpace = new View(this);
-        homePanel.addView(topSpace, new LinearLayout.LayoutParams(1, 0, 0.9f));
+        homePanel.addView(topSpace,
+                new LinearLayout.LayoutParams(
+                        1, 0, 0.9f
+                ));
 
+        // Logo
         addLogo(homePanel, 58);
 
-        TextView subtitle = makeText("Jelajahi dunia dengan OoeR", 14, gray);
+        // Slogan
+        TextView subtitle = makeText(
+                "Jelajahi dunia dengan OoeR",
+                14,
+                gray
+        );
+
         subtitle.setGravity(Gravity.CENTER);
-        subtitle.setPadding(0, 14, 0, 42);
+        subtitle.setPadding(0, dp(14), 0, dp(36));
         homePanel.addView(subtitle);
 
-        // Search Bar
+        // Kolom pencarian
         LinearLayout searchBar = new LinearLayout(this);
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
-        searchBar.setPadding(18, 0, 12, 0);
-        searchBar.setBackground(rounded(card, 32));
+        searchBar.setPadding(dp(12), 0, dp(10), 0);
+        searchBar.setBackground(rounded(card, dp(32)));
 
         SearchIcon searchIcon = new SearchIcon();
-        searchBar.addView(searchIcon, new LinearLayout.LayoutParams(42, 42));
+
+        searchBar.addView(searchIcon,
+                new LinearLayout.LayoutParams(dp(36), dp(42)));
 
         homeSearchInput = makeInput("Cari apa");
-        searchBar.addView(homeSearchInput, new LinearLayout.LayoutParams(0, 56, 1));
+
+        searchBar.addView(homeSearchInput,
+                new LinearLayout.LayoutParams(0, dp(56), 1));
 
         View mic = createMicIcon();
-        searchBar.addView(mic, new LinearLayout.LayoutParams(42, 42));
+
+        searchBar.addView(mic,
+                new LinearLayout.LayoutParams(dp(34), dp(42)));
+
         mic.setOnClickListener(v ->
-                Toast.makeText(this, "Fitur mikrofon akan dikembangkan", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                        this,
+                        "Fitur mikrofon akan dikembangkan",
+                        Toast.LENGTH_SHORT
+                ).show()
         );
 
+        // Tombol pencarian hijau
         Button sendBtn = new Button(this);
         sendBtn.setText("↑");
         sendBtn.setTextSize(20);
         sendBtn.setTypeface(null, Typeface.BOLD);
         sendBtn.setTextColor(Color.BLACK);
         sendBtn.setAllCaps(false);
-        sendBtn.setPadding(0, 0, 0, 2);
-        sendBtn.setBackground(rounded(green, 22));
-        searchBar.addView(sendBtn, new LinearLayout.LayoutParams(44, 44));
+        sendBtn.setPadding(0, 0, 0, dp(2));
+        sendBtn.setMinWidth(0);
+        sendBtn.setMinimumWidth(0);
+        sendBtn.setBackground(rounded(green, dp(22)));
 
-        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 64
+        searchBar.addView(sendBtn,
+                new LinearLayout.LayoutParams(dp(42), dp(42)));
+
+        // Lebar pencarian menyesuaikan ukuran layar.
+        int screenWidth = getResources()
+                .getDisplayMetrics().widthPixels;
+
+        int sideSpace = dp(32);
+        int maxSearchWidth = dp(360);
+
+        int searchWidth = Math.min(
+                maxSearchWidth,
+                Math.max(dp(220), screenWidth - sideSpace * 2)
         );
-        searchParams.setMargins(28, 0, 28, 0);
+
+        LinearLayout.LayoutParams searchParams =
+                new LinearLayout.LayoutParams(
+                        searchWidth,
+                        dp(64)
+                );
+
+        searchParams.gravity = Gravity.CENTER_HORIZONTAL;
+
         homePanel.addView(searchBar, searchParams);
 
-        sendBtn.setOnClickListener(v -> openAddress(homeSearchInput));
-        homeSearchInput.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE) {
-                openAddress(homeSearchInput);
-                return true;
-            }
-            return false;
-        });
+        sendBtn.setOnClickListener(
+                v -> openAddress(homeSearchInput)
+        );
 
-        // Quick Actions
-        LinearLayout quickRow = new LinearLayout(this);
-        quickRow.setOrientation(LinearLayout.HORIZONTAL);
-        quickRow.setGravity(Gravity.CENTER);
-        quickRow.setPadding(0, 28, 0, 0);
+        homeSearchInput.setOnEditorActionListener(
+                (v, actionId, event) -> {
+                    if (actionId == EditorInfo.IME_ACTION_GO
+                            || actionId == EditorInfo.IME_ACTION_DONE) {
+                        openAddress(homeSearchInput);
+                        return true;
+                    }
+                    return false;
+                }
+        );
 
-        quickRow.addView(makeQuickChip("✦ Mode AI", v -> {
-            Toast.makeText(this, "Mode AI segera hadir", Toast.LENGTH_SHORT).show();
-        }));
-
-        quickRow.addView(makeQuickChip("</> HTML", v -> showEditor()));
-
-        quickRow.addView(makeQuickChip("🌐 Browser", v -> {
-            homeSearchInput.setText("google.com");
-            openAddress(homeSearchInput);
-        }));
-
-        homePanel.addView(quickRow);
-
+        // Area bawah beranda dibiarkan kosong.
         View bottomSpace = new View(this);
-        homePanel.addView(bottomSpace, new LinearLayout.LayoutParams(1, 0, 1.4f));
 
-        // WebView
+        homePanel.addView(bottomSpace,
+                new LinearLayout.LayoutParams(1, 0, 1.4f));
+
+        // ==================== WEBVIEW ====================
+
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
-        // HTML Editor
+        // ==================== EDITOR HTML ====================
+
         htmlPanel = new LinearLayout(this);
         htmlPanel.setOrientation(LinearLayout.VERTICAL);
-        htmlPanel.setPadding(16, 12, 16, 12);
+        htmlPanel.setPadding(dp(16), dp(12), dp(16), dp(12));
         htmlPanel.setBackgroundColor(black);
 
-        TextView htmlTitle = makeText("Editor HTML OoeR", 18, green);
+        TextView htmlTitle = makeText(
+                "Editor HTML OoeR",
+                18,
+                green
+        );
+
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -396,62 +530,73 @@ public class MainActivity extends Activity {
         htmlInput.setTextColor(white);
         htmlInput.setGravity(Gravity.TOP | Gravity.START);
         htmlInput.setMinLines(5);
-        htmlInput.setPadding(14, 14, 14, 14);
-        htmlInput.setBackground(rounded(dark, 12));
+        htmlInput.setPadding(dp(14), dp(14), dp(14), dp(14));
+        htmlInput.setBackground(rounded(dark, dp(12)));
+
         htmlInput.setText(
                 "<h1>Selamat datang di OoeR</h1>\n" +
                 "<p>Ini adalah mesin render HTML OoeR.</p>\n" +
                 "<h2>Fitur awal</h2>\n" +
-                "<ul>\n<li>Judul</li>\n<li>Paragraf</li>\n<li>Daftar</li>\n</ul>\n" +
-                "<hr>\n<p>Mesin akan terus dikembangkan.</p>"
+                "<ul>\n" +
+                "<li>Judul</li>\n" +
+                "<li>Paragraf</li>\n" +
+                "<li>Daftar</li>\n" +
+                "</ul>\n" +
+                "<hr>\n" +
+                "<p>Mesin akan terus dikembangkan.</p>"
         );
-        htmlPanel.addView(htmlInput, new LinearLayout.LayoutParams(-1, 0, 1));
+
+        htmlPanel.addView(htmlInput,
+                new LinearLayout.LayoutParams(
+                        -1, 0, 1
+                ));
 
         Button renderButton = makeButton("Tampilkan HTML");
         renderButton.setTextColor(green);
         htmlPanel.addView(renderButton);
 
-        TextView resultTitle = makeText("Hasil render:", 15, white);
-        resultTitle.setPadding(0, 12, 0, 8);
+        TextView resultTitle = makeText(
+                "Hasil render:",
+                15,
+                white
+        );
+
+        resultTitle.setPadding(0, dp(12), 0, dp(8));
         htmlPanel.addView(resultTitle);
 
         ScrollView resultScroll = new ScrollView(this);
         resultScroll.setBackgroundColor(Color.WHITE);
-        resultScroll.setPadding(12, 12, 12, 12);
+        resultScroll.setPadding(dp(12), dp(12), dp(12), dp(12));
 
         renderView = new OeRRenderView(this);
         resultScroll.addView(renderView);
-        htmlPanel.addView(resultScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+
+        htmlPanel.addView(resultScroll,
+                new LinearLayout.LayoutParams(
+                        -1, 0, 1
+                ));
 
         renderButton.setOnClickListener(v ->
-                renderView.renderHtml(htmlInput.getText().toString())
+                renderView.renderHtml(
+                        htmlInput.getText().toString()
+                )
         );
 
-        contentFrame.addView(homePanel, new FrameLayout.LayoutParams(-1, -1));
-        contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
-        contentFrame.addView(htmlPanel, new FrameLayout.LayoutParams(-1, -1));
+        // Pasang panel ke frame.
+        contentFrame.addView(homePanel,
+                new FrameLayout.LayoutParams(-1, -1));
 
-        root.addView(contentFrame, new LinearLayout.LayoutParams(-1, 0, 1));
+        contentFrame.addView(webView,
+                new FrameLayout.LayoutParams(-1, -1));
+
+        contentFrame.addView(htmlPanel,
+                new FrameLayout.LayoutParams(-1, -1));
+
+        root.addView(contentFrame,
+                new LinearLayout.LayoutParams(-1, 0, 1));
     }
 
-    private View makeQuickChip(String text, View.OnClickListener listener) {
-        TextView chip = new TextView(this);
-        chip.setText(text);
-        chip.setTextSize(13);
-        chip.setTextColor(Color.rgb(220, 220, 220));
-        chip.setGravity(Gravity.CENTER);
-        chip.setPadding(22, 14, 22, 14);
-        chip.setBackground(rounded(card, 24));
-        chip.setOnClickListener(listener);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(8, 0, 8, 0);
-        chip.setLayoutParams(params);
-        return chip;
-    }
+    // ==================== TAMPILAN ====================
 
     private void showHome() {
         homePanel.setVisibility(View.VISIBLE);
@@ -475,26 +620,44 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.VISIBLE);
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
-        renderView.renderHtml(htmlInput.getText().toString());
+
+        renderView.renderHtml(
+                htmlInput.getText().toString()
+        );
     }
+
+    // ==================== PENCARIAN / ALAMAT ====================
 
     private void openAddress(EditText input) {
         String query = input.getText().toString().trim();
+
         if (query.isEmpty()) {
-            Toast.makeText(this, "Masukkan alamat atau pencarian", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    this,
+                    "Masukkan alamat atau pencarian",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
         String url;
+
         if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
             url = query;
-        } else if (query.matches("(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
+        } else if (query.matches(
+                "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$"
+        )) {
             url = "https://" + query;
         } else {
             try {
-                url = "https://www.google.com/search?q=" + java.net.URLEncoder.encode(query, "UTF-8");
+                url = "https://www.google.com/search?q=" +
+                        java.net.URLEncoder.encode(query, "UTF-8");
             } catch (Exception e) {
-                Toast.makeText(this, "Pencarian gagal", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        this,
+                        "Pencarian gagal",
+                        Toast.LENGTH_SHORT
+                ).show();
                 return;
             }
         }
@@ -504,13 +667,18 @@ public class MainActivity extends Activity {
         webView.loadUrl(url);
     }
 
+    // ==================== TOMBOL KEMBALI HP ====================
+
     @Override
     public void onBackPressed() {
         if (htmlPanel.getVisibility() == View.VISIBLE) {
             showHome();
         } else if (webView.getVisibility() == View.VISIBLE) {
-            if (webView.canGoBack()) webView.goBack();
-            else showHome();
+            if (webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                showHome();
+            }
         } else {
             super.onBackPressed();
         }
@@ -518,13 +686,20 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (webView != null) webView.destroy();
+        if (webView != null) {
+            webView.destroy();
+        }
+
         super.onDestroy();
     }
 
-    // ==================== Simple HTML Renderer ====================
+    // ==================== RENDERER HTML SEDERHANA ====================
+
     private static class OeRRenderView extends LinearLayout {
-        public OeRRenderView(android.content.Context context) {
+
+        public OeRRenderView(
+                android.content.Context context
+        ) {
             super(context);
             setOrientation(VERTICAL);
             setPadding(8, 8, 8, 8);
@@ -532,6 +707,7 @@ public class MainActivity extends Activity {
 
         public void renderHtml(String html) {
             removeAllViews();
+
             if (html == null || html.trim().isEmpty()) {
                 TextView empty = new TextView(getContext());
                 empty.setText("Tidak ada konten");
@@ -541,46 +717,83 @@ public class MainActivity extends Activity {
             }
 
             String[] lines = html.split("\n");
+
             for (String raw : lines) {
                 String line = raw.trim();
-                if (line.isEmpty()) continue;
+
+                if (line.isEmpty()) {
+                    continue;
+                }
 
                 TextView tv = new TextView(getContext());
                 tv.setTextColor(Color.BLACK);
                 tv.setPadding(0, 4, 0, 4);
 
-                if (line.startsWith("<h1>") && line.endsWith("</h1>")) {
+                if (line.startsWith("<h1>")
+                        && line.endsWith("</h1>")) {
+
                     tv.setText(stripTags(line));
                     tv.setTextSize(24);
                     tv.setTypeface(null, Typeface.BOLD);
                     tv.setPadding(0, 12, 0, 8);
-                } else if (line.startsWith("<h2>") && line.endsWith("</h2>")) {
+
+                } else if (line.startsWith("<h2>")
+                        && line.endsWith("</h2>")) {
+
                     tv.setText(stripTags(line));
                     tv.setTextSize(20);
                     tv.setTypeface(null, Typeface.BOLD);
                     tv.setPadding(0, 10, 0, 6);
-                } else if (line.startsWith("<p>") && line.endsWith("</p>")) {
+
+                } else if (line.startsWith("<p>")
+                        && line.endsWith("</p>")) {
+
                     tv.setText(stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(0, 6, 0, 6);
-                } else if (line.startsWith("<li>") && line.endsWith("</li>")) {
+
+                } else if (line.startsWith("<li>")
+                        && line.endsWith("</li>")) {
+
                     tv.setText("•  " + stripTags(line));
                     tv.setTextSize(15);
                     tv.setPadding(16, 3, 0, 3);
-                } else if (line.equals("<hr>") || line.equals("<hr/>") || line.equals("<hr />")) {
+
+                } else if (line.equals("<hr>")
+                        || line.equals("<hr/>")
+                        || line.equals("<hr />")) {
+
                     View lineView = new View(getContext());
-                    lineView.setBackgroundColor(Color.rgb(200, 200, 200));
-                    addView(lineView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                    lineView.setBackgroundColor(
+                            Color.rgb(200, 200, 200)
+                    );
+
+                    addView(lineView,
+                            new LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    2
+                            ));
+
                     continue;
-                } else if (line.startsWith("<ul>") || line.startsWith("</ul>") ||
-                        line.startsWith("<ol>") || line.startsWith("</ol>")) {
+
+                } else if (line.startsWith("<ul>")
+                        || line.startsWith("</ul>")
+                        || line.startsWith("<ol>")
+                        || line.startsWith("</ol>")) {
+
                     continue;
+
                 } else {
                     String clean = stripTags(line);
-                    if (clean.isEmpty()) continue;
+
+                    if (clean.isEmpty()) {
+                        continue;
+                    }
+
                     tv.setText(clean);
                     tv.setTextSize(15);
                 }
+
                 addView(tv);
             }
         }
