@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
         return input;
     }
 
-    // Logo O dengan warna pelangi
+    // Logo O pelangi — warna tetap
     private class RainbowTextView extends TextView {
 
         public RainbowTextView(String text, int size) {
@@ -161,7 +161,7 @@ public class MainActivity extends Activity {
         parent.addView(logo);
     }
 
-    // Ikon O pelangi pada kolom pencarian
+    // Ikon pencarian O pelangi — warna tetap
     private class RainbowSearchIcon extends View {
 
         private final Paint paint =
@@ -213,7 +213,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    // Ikon mikrofon bergaya minimalis
+    // Ikon mikrofon putih — bentuk dan warna tetap
     private View createMicIcon() {
         return new View(this) {
 
@@ -233,27 +233,23 @@ public class MainActivity extends Activity {
                 paint.setStrokeCap(Paint.Cap.ROUND);
                 paint.setStrokeJoin(Paint.Join.ROUND);
 
-                // Kepala mikrofon
                 canvas.drawRoundRect(
                     cx - 5, cy - 12,
                     cx + 5, cy + 5,
                     5, 5, paint
                 );
 
-                // Lengkungan mikrofon
                 canvas.drawArc(
                     cx - 10, cy - 7,
                     cx + 10, cy + 12,
                     0, 180, false, paint
                 );
 
-                // Batang mikrofon
                 canvas.drawLine(
                     cx, cy + 12,
                     cx, cy + 17, paint
                 );
 
-                // Alas mikrofon
                 canvas.drawLine(
                     cx - 5, cy + 17,
                     cx + 5, cy + 17, paint
@@ -262,19 +258,21 @@ public class MainActivity extends Activity {
         };
     }
 
-    // Header akun di pojok kanan
+    // Tombol Akun: diturunkan dan diberi jarak dari pinggir
     private void createHeader() {
         LinearLayout header = new LinearLayout(this);
         header.setGravity(
             Gravity.RIGHT | Gravity.CENTER_VERTICAL
         );
-        header.setPadding(12, 6, 16, 6);
+
+        // Jarak atas 28 px, kanan 8 px
+        header.setPadding(0, 28, 8, 0);
         header.setBackgroundColor(black);
 
         Button account = makeButton("♙ Akun");
         account.setTextColor(green);
         account.setTextSize(14);
-        account.setPadding(16, 0, 16, 0);
+        account.setPadding(10, 0, 10, 0);
         account.setMinWidth(0);
         account.setMinimumWidth(0);
         account.setMinHeight(0);
@@ -290,7 +288,7 @@ public class MainActivity extends Activity {
         );
 
         root.addView(header,
-            new LinearLayout.LayoutParams(-1, 54));
+            new LinearLayout.LayoutParams(-1, 66));
     }
 
     private void showAccountInfo() {
@@ -387,11 +385,11 @@ public class MainActivity extends Activity {
         homePanel.setPadding(22, 20, 22, 20);
         homePanel.setBackgroundColor(black);
 
-        // Ruang atas agar logo berada di area tengah
         View topSpace = new View(this);
         homePanel.addView(topSpace,
             new LinearLayout.LayoutParams(1, 0, 1));
 
+        // Logo dan warna tetap
         addLogo(homePanel, 48);
 
         TextView subtitle = makeText(
@@ -412,18 +410,20 @@ public class MainActivity extends Activity {
             new RainbowSearchIcon();
 
         searchBar.addView(searchIcon,
-            new LinearLayout.LayoutParams(38, 38));
+            new LinearLayout.LayoutParams(38, 46));
 
         homeSearchInput = makeInput("Cari apa saja...");
 
-        searchBar.addView(homeSearchInput,
-            new LinearLayout.LayoutParams(0, 48, 1));
+        homeSearchInput.setTextSize(14);
 
-        // Mikrofon
+        searchBar.addView(homeSearchInput,
+            new LinearLayout.LayoutParams(0, 54, 1));
+
+        // Ikon mikrofon tetap putih
         View mic = createMicIcon();
 
         searchBar.addView(mic,
-            new LinearLayout.LayoutParams(38, 42));
+            new LinearLayout.LayoutParams(38, 46));
 
         mic.setOnClickListener(v ->
             Toast.makeText(
@@ -433,7 +433,7 @@ public class MainActivity extends Activity {
             ).show()
         );
 
-        // Tombol panah pencarian
+        // Tombol panah tetap hijau
         Button search = makeButton("↑");
         search.setTextSize(23);
         search.setTypeface(null, Typeface.BOLD);
@@ -445,15 +445,15 @@ public class MainActivity extends Activity {
         );
 
         searchBar.addView(search,
-            new LinearLayout.LayoutParams(42, 42));
+            new LinearLayout.LayoutParams(42, 52));
 
-        // Kolom lebih pendek dan lebih tinggi
+        // Kolom lebih pendek ke samping, lebih tinggi ke bawah
         LinearLayout.LayoutParams searchParams =
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 60
-            );
+            new LinearLayout.LayoutParams(280, 70);
 
+        searchParams.gravity = Gravity.CENTER_HORIZONTAL;
         searchParams.setMargins(12, 0, 12, 0);
+
         homePanel.addView(searchBar, searchParams);
 
         search.setOnClickListener(v ->
@@ -470,7 +470,7 @@ public class MainActivity extends Activity {
             }
         );
 
-        // Bagian bawah tetap kosong
+        // Area bawah Home tetap kosong
         View bottomSpace = new View(this);
         homePanel.addView(bottomSpace,
             new LinearLayout.LayoutParams(1, 0, 2));
@@ -482,7 +482,7 @@ public class MainActivity extends Activity {
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
-        // EDITOR HTML
+        // EDITOR HTML — tetap dipertahankan
         htmlPanel = new LinearLayout(this);
         htmlPanel.setOrientation(LinearLayout.VERTICAL);
         htmlPanel.setPadding(12, 8, 12, 12);
