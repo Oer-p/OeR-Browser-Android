@@ -274,7 +274,7 @@ public class MainActivity extends Activity {
         );
 
         // Akun di kiri, tidak menempel tepi dan sedikit turun.
-        header.setPadding(dp(16), dp(10), dp(8), 0);
+        header.setPadding(dp(16), dp(55), dp(8), 0);
         header.setBackgroundColor(black);
 
         Button account = makeButton("Akun");
