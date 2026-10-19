@@ -1,3 +1,4 @@
+
 package id.oer.browser;
 
 import android.app.Activity;
@@ -84,6 +85,8 @@ public class MainActivity extends Activity {
         button.setTextColor(white);
         button.setTextSize(13);
         button.setAllCaps(false);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
         button.setBackgroundTintList(
             android.content.res.ColorStateList.valueOf(dark)
         );
@@ -97,20 +100,22 @@ public class MainActivity extends Activity {
         input.setTextColor(white);
         input.setHintTextColor(gray);
         input.setHint(hint);
-        input.setPadding(10, 4, 10, 4);
+        input.setPadding(8, 4, 8, 4);
         input.setBackgroundColor(Color.TRANSPARENT);
         input.setImeOptions(EditorInfo.IME_ACTION_GO);
         return input;
     }
 
-    // Huruf O dengan warna pelangi
+    // Logo O dengan warna pelangi
     private class RainbowTextView extends TextView {
+
         public RainbowTextView(String text, int size) {
             super(MainActivity.this);
             setText(text);
             setTextSize(size);
             setTypeface(null, Typeface.BOLD);
             setGravity(Gravity.CENTER);
+            setIncludeFontPadding(false);
         }
 
         @Override
@@ -130,6 +135,7 @@ public class MainActivity extends Activity {
                     Shader.TileMode.CLAMP
                 ));
             }
+
             super.onDraw(canvas);
             getPaint().setShader(null);
         }
@@ -141,20 +147,25 @@ public class MainActivity extends Activity {
         logo.setGravity(Gravity.CENTER);
 
         logo.addView(new RainbowTextView("O", size));
+
         TextView oe = makeText("oe", size, white);
         oe.setTypeface(null, Typeface.BOLD);
+        oe.setIncludeFontPadding(false);
         logo.addView(oe);
 
         TextView r = makeText("R", size, green);
         r.setTypeface(null, Typeface.BOLD);
+        r.setIncludeFontPadding(false);
         logo.addView(r);
 
         parent.addView(logo);
     }
 
-    // Ikon O pelangi untuk kolom pencarian
+    // Ikon O pelangi pada kolom pencarian
     private class RainbowSearchIcon extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        private final Paint paint =
+            new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public RainbowSearchIcon() {
             super(MainActivity.this);
@@ -166,11 +177,13 @@ public class MainActivity extends Activity {
 
             float cx = getWidth() * 0.43f;
             float cy = getHeight() * 0.40f;
-            float radius = Math.min(getWidth(), getHeight()) * 0.29f;
+            float radius =
+                Math.min(getWidth(), getHeight()) * 0.29f;
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(4.5f);
             paint.setStrokeCap(Paint.Cap.ROUND);
+
             paint.setShader(new LinearGradient(
                 0, 0, getWidth(), getHeight(),
                 new int[] {
@@ -189,6 +202,7 @@ public class MainActivity extends Activity {
 
             paint.setShader(null);
             paint.setColor(green);
+
             canvas.drawLine(
                 cx + radius * 0.7f,
                 cy + radius * 0.7f,
@@ -199,21 +213,82 @@ public class MainActivity extends Activity {
         }
     }
 
+    // Ikon mikrofon bergaya minimalis
+    private View createMicIcon() {
+        return new View(this) {
+
+            private final Paint paint =
+                new Paint(Paint.ANTI_ALIAS_FLAG);
+
+            @Override
+            protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+
+                float cx = getWidth() / 2f;
+                float cy = getHeight() / 2f;
+
+                paint.setColor(white);
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(2.2f);
+                paint.setStrokeCap(Paint.Cap.ROUND);
+                paint.setStrokeJoin(Paint.Join.ROUND);
+
+                // Kepala mikrofon
+                canvas.drawRoundRect(
+                    cx - 5, cy - 12,
+                    cx + 5, cy + 5,
+                    5, 5, paint
+                );
+
+                // Lengkungan mikrofon
+                canvas.drawArc(
+                    cx - 10, cy - 7,
+                    cx + 10, cy + 12,
+                    0, 180, false, paint
+                );
+
+                // Batang mikrofon
+                canvas.drawLine(
+                    cx, cy + 12,
+                    cx, cy + 17, paint
+                );
+
+                // Alas mikrofon
+                canvas.drawLine(
+                    cx - 5, cy + 17,
+                    cx + 5, cy + 17, paint
+                );
+            }
+        };
+    }
+
+    // Header akun di pojok kanan
     private void createHeader() {
         LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        header.setPadding(12, 8, 14, 8);
+        header.setGravity(
+            Gravity.RIGHT | Gravity.CENTER_VERTICAL
+        );
+        header.setPadding(12, 6, 16, 6);
         header.setBackgroundColor(black);
 
         Button account = makeButton("♙ Akun");
         account.setTextColor(green);
-        account.setBackground(
-            rounded(dark, 40)
-        );
+        account.setTextSize(14);
+        account.setPadding(16, 0, 16, 0);
+        account.setMinWidth(0);
+        account.setMinimumWidth(0);
+        account.setMinHeight(0);
+        account.setMinimumHeight(0);
+        account.setBackground(rounded(dark, 40));
 
         account.setOnClickListener(v -> showAccountInfo());
 
-        header.addView(account);
+        header.addView(account,
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, 42
+            )
+        );
+
         root.addView(header,
             new LinearLayout.LayoutParams(-1, 54));
     }
@@ -230,13 +305,17 @@ public class MainActivity extends Activity {
             .show();
     }
 
+    // Bilah alamat saat membuka situs
     private void createAddressBar() {
         addressRow = new LinearLayout(this);
         addressRow.setGravity(Gravity.CENTER_VERTICAL);
         addressRow.setPadding(8, 3, 8, 3);
         addressRow.setBackgroundColor(black);
 
-        addressInput = makeInput("Cari atau masukkan alamat...");
+        addressInput = makeInput(
+            "Cari atau masukkan alamat..."
+        );
+
         addressRow.addView(addressInput,
             new LinearLayout.LayoutParams(0, 48, 1));
 
@@ -244,7 +323,8 @@ public class MainActivity extends Activity {
         open.setTextColor(green);
         addressRow.addView(open);
 
-        open.setOnClickListener(v -> openAddress(addressInput));
+        open.setOnClickListener(v ->
+            openAddress(addressInput));
 
         addressInput.setOnEditorActionListener(
             (v, actionId, event) -> {
@@ -261,6 +341,7 @@ public class MainActivity extends Activity {
         addressRow.setVisibility(View.GONE);
     }
 
+    // Navigasi browser
     private void createNavigation() {
         navRow = new LinearLayout(this);
         navRow.setGravity(Gravity.CENTER);
@@ -299,13 +380,14 @@ public class MainActivity extends Activity {
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // HOME
+        // HOME OoeR
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
         homePanel.setPadding(22, 20, 22, 20);
         homePanel.setBackgroundColor(black);
 
+        // Ruang atas agar logo berada di area tengah
         View topSpace = new View(this);
         homePanel.addView(topSpace,
             new LinearLayout.LayoutParams(1, 0, 1));
@@ -313,7 +395,8 @@ public class MainActivity extends Activity {
         addLogo(homePanel, 48);
 
         TextView subtitle = makeText(
-            "Jelajahi dunia dengan OoeR", 14, gray);
+            "Jelajahi dunia dengan OoeR", 14, gray
+        );
         subtitle.setGravity(Gravity.CENTER);
         subtitle.setPadding(0, 8, 0, 30);
         homePanel.addView(subtitle);
@@ -325,36 +408,52 @@ public class MainActivity extends Activity {
         searchBar.setPadding(8, 3, 5, 3);
         searchBar.setBackground(rounded(dark, 28));
 
-        RainbowSearchIcon searchIcon = new RainbowSearchIcon();
+        RainbowSearchIcon searchIcon =
+            new RainbowSearchIcon();
+
         searchBar.addView(searchIcon,
             new LinearLayout.LayoutParams(38, 38));
 
         homeSearchInput = makeInput("Cari apa saja...");
+
         searchBar.addView(homeSearchInput,
             new LinearLayout.LayoutParams(0, 48, 1));
 
-        Button mic = makeButton("🎙");
-        mic.setTextSize(18);
-        mic.setPadding(4, 0, 4, 0);
-        mic.setBackgroundColor(Color.TRANSPARENT);
-        searchBar.addView(mic,
-            new LinearLayout.LayoutParams(42, 44));
+        // Mikrofon
+        View mic = createMicIcon();
 
+        searchBar.addView(mic,
+            new LinearLayout.LayoutParams(38, 42));
+
+        mic.setOnClickListener(v ->
+            Toast.makeText(
+                this,
+                "Fitur mikrofon akan dikembangkan",
+                Toast.LENGTH_SHORT
+            ).show()
+        );
+
+        // Tombol panah pencarian
         Button search = makeButton("↑");
         search.setTextSize(23);
         search.setTypeface(null, Typeface.BOLD);
         search.setTextColor(Color.BLACK);
+        search.setGravity(Gravity.CENTER);
+        search.setPadding(0, 0, 0, 2);
         search.setBackgroundTintList(
             android.content.res.ColorStateList.valueOf(green)
         );
-        search.setPadding(0, 0, 0, 2);
 
         searchBar.addView(search,
             new LinearLayout.LayoutParams(42, 42));
 
+        // Kolom lebih pendek dan lebih tinggi
         LinearLayout.LayoutParams searchParams =
-            new LinearLayout.LayoutParams(-1, 56);
-        searchParams.setMargins(0, 0, 0, 0);
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 60
+            );
+
+        searchParams.setMargins(12, 0, 12, 0);
         homePanel.addView(searchBar, searchParams);
 
         search.setOnClickListener(v ->
@@ -371,20 +470,12 @@ public class MainActivity extends Activity {
             }
         );
 
-        mic.setOnClickListener(v ->
-            Toast.makeText(
-                this,
-                "Fitur mikrofon akan dikembangkan",
-                Toast.LENGTH_SHORT
-            ).show()
-        );
-
         // Bagian bawah tetap kosong
         View bottomSpace = new View(this);
         homePanel.addView(bottomSpace,
             new LinearLayout.LayoutParams(1, 0, 2));
 
-        // BROWSER
+        // WEB BROWSER
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -398,7 +489,8 @@ public class MainActivity extends Activity {
         htmlPanel.setBackgroundColor(black);
 
         TextView htmlTitle = makeText(
-            "Editor HTML OoeR", 18, green);
+            "Editor HTML OoeR", 18, green
+        );
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -409,6 +501,7 @@ public class MainActivity extends Activity {
         htmlInput.setMinLines(4);
         htmlInput.setPadding(12, 12, 12, 12);
         htmlInput.setBackground(rounded(dark, 12));
+
         htmlInput.setText(
             "<h1>Selamat datang di OoeR</h1>" +
             "<p>Ini adalah mesin render HTML OoeR.</p>" +
@@ -426,7 +519,8 @@ public class MainActivity extends Activity {
         htmlPanel.addView(renderButton);
 
         TextView resultTitle = makeText(
-            "Hasil render:", 15, white);
+            "Hasil render:", 15, white
+        );
         resultTitle.setPadding(0, 8, 0, 6);
         htmlPanel.addView(resultTitle);
 
@@ -445,10 +539,13 @@ public class MainActivity extends Activity {
             )
         );
 
+        // Tambahkan panel ke layar
         contentFrame.addView(homePanel,
             new FrameLayout.LayoutParams(-1, -1));
+
         contentFrame.addView(webView,
             new FrameLayout.LayoutParams(-1, -1));
+
         contentFrame.addView(htmlPanel,
             new FrameLayout.LayoutParams(-1, -1));
 
@@ -478,39 +575,46 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.VISIBLE);
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
-        renderView.renderHtml(htmlInput.getText().toString());
-    }
 
-    private void loadWebsite(String url) {
-        addressInput.setText(url);
-        showBrowser();
-        webView.loadUrl(url);
+        renderView.renderHtml(
+            htmlInput.getText().toString()
+        );
     }
 
     private void openAddress(EditText input) {
         String query = input.getText().toString().trim();
 
         if (query.isEmpty()) {
-            Toast.makeText(this,
+            Toast.makeText(
+                this,
                 "Masukkan alamat atau pencarian",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
         String url;
 
-        if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
+        if (query.matches(
+                "(?i)^[a-z][a-z0-9+.-]*://.*")) {
             url = query;
+
         } else if (query.matches(
                 "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
             url = "https://" + query;
+
         } else {
             try {
                 url = "https://www.google.com/search?q="
-                    + java.net.URLEncoder.encode(query, "UTF-8");
+                    + java.net.URLEncoder.encode(
+                        query, "UTF-8"
+                    );
             } catch (Exception e) {
-                Toast.makeText(this, "Pencarian gagal",
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                    this,
+                    "Pencarian gagal",
+                    Toast.LENGTH_SHORT
+                ).show();
                 return;
             }
         }
@@ -524,12 +628,14 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if (htmlPanel.getVisibility() == View.VISIBLE) {
             showHome();
+
         } else if (webView.getVisibility() == View.VISIBLE) {
             if (webView.canGoBack()) {
                 webView.goBack();
             } else {
                 showHome();
             }
+
         } else {
             super.onBackPressed();
         }
@@ -540,7 +646,7 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.destroy();
         }
+
         super.onDestroy();
     }
-                        }
-            
+}
