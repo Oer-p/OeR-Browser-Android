@@ -3,6 +3,8 @@ package id.oer.browser;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,6 +13,7 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +38,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -50,6 +55,10 @@ public class MainActivity extends Activity {
     private static final String ACCESS = "access_token";
     private static final String REFRESH = "refresh_token";
     private static final String EMAIL = "email";
+    private static final String PKCE_VERIFIER = "pkce_verifier";
+
+    private static final String GOOGLE_REDIRECT =
+            "id.oer.browser://login-callback/";
 
     private final ExecutorService executor =
             Executors.newSingleThreadExecutor();
@@ -95,6 +104,15 @@ public class MainActivity extends Activity {
         setContentView(root);
         updateAccountButton();
         showHome();
+
+        handleAuthCallback(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleAuthCallback(intent);
     }
 
     private int dp(float value) {
@@ -494,11 +512,15 @@ public class MainActivity extends Activity {
     }
 
     private void showAuthError(String message) {
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setTitle("Autentikasi gagal")
-                .setMessage(message)
-                .setPositiveButton("Tutup", null)
-                .show());
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Autentikasi gagal")
+                    .setMessage(message)
+                    .setPositiveButton("Tutup", null)
+                    .show();
+        });
     }
 
     private void logout() {
@@ -511,33 +533,224 @@ public class MainActivity extends Activity {
                 Toast.LENGTH_SHORT).show();
     }
 
+    // ==================== GOOGLE OAUTH PKCE ====================
+
     private void startGoogleLogin() {
-        try {
-            String redirect = "id.oer.browser://login-callback/";
-            String url = SUPABASE_URL
-                    + "/auth/v1/authorize?provider=google"
-                    + "&redirect_to="
-                    + URLEncoder.encode(redirect, "UTF-8");
+        executor.execute(() -> {
+            try {
+                byte[] randomBytes = new byte[32];
+                new SecureRandom().nextBytes(randomBytes);
 
-            new AlertDialog.Builder(this)
-                    .setTitle("Login Google")
-                    .setMessage(
-                            "Login Google belum menyimpan sesi otomatis " +
-                            "pada versi ini. Integrasi PKCE dan callback " +
-                            "perlu ditambahkan sebelum fitur ini siap digunakan."
-                    )
-                    .setPositiveButton("Buka login", (d, w) -> {
-                        showBrowser();
-                        addressInput.setText(url);
-                        webView.loadUrl(url);
-                    })
-                    .setNegativeButton("Batal", null)
-                    .show();
+                String verifier = Base64.encodeToString(
+                        randomBytes,
+                        Base64.URL_SAFE
+                                | Base64.NO_WRAP
+                                | Base64.NO_PADDING
+                );
 
-        } catch (Exception e) {
-            Toast.makeText(this, "Gagal membuka login Google",
-                    Toast.LENGTH_SHORT).show();
+                MessageDigest digest =
+                        MessageDigest.getInstance("SHA-256");
+
+                byte[] challengeBytes = digest.digest(
+                        verifier.getBytes(StandardCharsets.US_ASCII)
+                );
+
+                String challenge = Base64.encodeToString(
+                        challengeBytes,
+                        Base64.URL_SAFE
+                                | Base64.NO_WRAP
+                                | Base64.NO_PADDING
+                );
+
+                getSharedPreferences(PREFS, MODE_PRIVATE)
+                        .edit()
+                        .putString(PKCE_VERIFIER, verifier)
+                        .apply();
+
+                String authUrl = SUPABASE_URL
+                        + "/auth/v1/authorize?provider=google"
+                        + "&redirect_to="
+                        + URLEncoder.encode(GOOGLE_REDIRECT, "UTF-8")
+                        + "&code_challenge="
+                        + URLEncoder.encode(challenge, "UTF-8")
+                        + "&code_challenge_method=s256"
+                        + "&apikey="
+                        + URLEncoder.encode(SUPABASE_KEY, "UTF-8");
+
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+
+                    try {
+                        Intent browserIntent = new Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(authUrl)
+                        );
+                        startActivity(browserIntent);
+                    } catch (Exception e) {
+                        showAuthError(
+                                "Tidak dapat membuka browser untuk login Google."
+                        );
+                    }
+                });
+
+            } catch (Exception e) {
+                showAuthError(
+                        "Gagal menyiapkan autentikasi Google."
+                );
+            }
+        });
+    }
+
+    private void handleAuthCallback(Intent intent) {
+        if (intent == null || intent.getData() == null) return;
+
+        Uri uri = intent.getData();
+
+        if (!"id.oer.browser".equals(uri.getScheme())
+                || !"login-callback".equals(uri.getHost())) {
+            return;
         }
+
+        String error = uri.getQueryParameter("error_description");
+
+        if (error == null || error.isEmpty()) {
+            error = uri.getQueryParameter("error");
+        }
+
+        if (error != null && !error.isEmpty()) {
+            showAuthError("Login Google gagal: " + error);
+            return;
+        }
+
+        String code = uri.getQueryParameter("code");
+
+        if (code == null || code.isEmpty()) {
+            showAuthError(
+                    "Kode login tidak ditemukan. Silakan coba login Google lagi."
+            );
+            return;
+        }
+
+        exchangeGoogleCode(code);
+    }
+
+    private void exchangeGoogleCode(String code) {
+        String verifier = saved(PKCE_VERIFIER);
+
+        if (verifier.isEmpty()) {
+            showAuthError(
+                    "Data verifikasi login tidak ditemukan. " +
+                    "Silakan ulangi login Google dari aplikasi."
+            );
+            return;
+        }
+
+        executor.execute(() -> {
+            HttpURLConnection connection = null;
+
+            try {
+                URL url = new URL(
+                        SUPABASE_URL
+                                + "/auth/v1/token?grant_type=pkce"
+                );
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(15000);
+                connection.setDoOutput(true);
+                connection.setRequestProperty(
+                        "Content-Type", "application/json"
+                );
+                connection.setRequestProperty("apikey", SUPABASE_KEY);
+
+                JSONObject body = new JSONObject();
+                body.put("auth_code", code);
+                body.put("code_verifier", verifier);
+
+                byte[] bytes = body.toString().getBytes(
+                        StandardCharsets.UTF_8
+                );
+
+                try (OutputStream out = connection.getOutputStream()) {
+                    out.write(bytes);
+                }
+
+                int status = connection.getResponseCode();
+
+                InputStream stream = status >= 200 && status < 300
+                        ? connection.getInputStream()
+                        : connection.getErrorStream();
+
+                String response = readStream(stream);
+                JSONObject json = new JSONObject(response);
+
+                if (status >= 200 && status < 300) {
+                    String access = json.optString("access_token", "");
+                    String refresh = json.optString("refresh_token", "");
+
+                    JSONObject user = json.optJSONObject("user");
+                    String email = user == null
+                            ? ""
+                            : user.optString("email", "");
+
+                    if (access.isEmpty() || refresh.isEmpty()) {
+                        showAuthError(
+                                "Supabase belum mengembalikan sesi lengkap."
+                        );
+                        return;
+                    }
+
+                    getSharedPreferences(PREFS, MODE_PRIVATE)
+                            .edit()
+                            .putString(ACCESS, access)
+                            .putString(REFRESH, refresh)
+                            .putString(EMAIL, email)
+                            .remove(PKCE_VERIFIER)
+                            .apply();
+
+                    runOnUiThread(() -> {
+                        if (isFinishing() || isDestroyed()) return;
+
+                        updateAccountButton();
+                        showHome();
+
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Login berhasil")
+                                .setMessage(
+                                        email.isEmpty()
+                                                ? "Kamu berhasil login dengan Google."
+                                                : "Login sebagai:\n" + email
+                                )
+                                .setPositiveButton("Oke", null)
+                                .show();
+                    });
+
+                } else {
+                    String message = json.optString(
+                            "msg",
+                            json.optString(
+                                    "message",
+                                    json.optString(
+                                            "error_description",
+                                            "Pertukaran kode login gagal ("
+                                                    + status + ")."
+                                    )
+                            )
+                    );
+
+                    showAuthError(message);
+                }
+
+            } catch (Exception e) {
+                showAuthError(
+                        "Tidak dapat menyelesaikan login Google. " +
+                        "Periksa koneksi internet dan konfigurasi Supabase."
+                );
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        });
     }
 
     // ==================== ADDRESS BAR ====================
@@ -582,10 +795,14 @@ public class MainActivity extends Activity {
         Button home = makeButton("⌂ Beranda");
         Button editor = makeButton("</> HTML");
 
-        navRow.addView(back, new LinearLayout.LayoutParams(0, dp(48), 1));
-        navRow.addView(refresh, new LinearLayout.LayoutParams(0, dp(48), 1));
-        navRow.addView(home, new LinearLayout.LayoutParams(0, dp(48), 1));
-        navRow.addView(editor, new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(back,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(refresh,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(home,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
+        navRow.addView(editor,
+                new LinearLayout.LayoutParams(0, dp(48), 1));
 
         back.setOnClickListener(v -> {
             if (webView.canGoBack()) webView.goBack();
