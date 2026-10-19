@@ -1,4 +1,3 @@
-
 package id.oer.browser;
 
 import android.app.Activity;
@@ -13,6 +12,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
         return input;
     }
 
-    // Logo O pelangi — warna tetap
+    // Logo O pelangi
     private class RainbowTextView extends TextView {
 
         public RainbowTextView(String text, int size) {
@@ -135,7 +135,6 @@ public class MainActivity extends Activity {
                     Shader.TileMode.CLAMP
                 ));
             }
-
             super.onDraw(canvas);
             getPaint().setShader(null);
         }
@@ -161,11 +160,10 @@ public class MainActivity extends Activity {
         parent.addView(logo);
     }
 
-    // Ikon pencarian O pelangi — warna tetap
+    // Ikon pencarian pelangi
     private class RainbowSearchIcon extends View {
 
-        private final Paint paint =
-            new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         public RainbowSearchIcon() {
             super(MainActivity.this);
@@ -177,8 +175,7 @@ public class MainActivity extends Activity {
 
             float cx = getWidth() * 0.43f;
             float cy = getHeight() * 0.40f;
-            float radius =
-                Math.min(getWidth(), getHeight()) * 0.29f;
+            float radius = Math.min(getWidth(), getHeight()) * 0.29f;
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(4.5f);
@@ -213,12 +210,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    // Ikon mikrofon putih — bentuk dan warna tetap
+    // Ikon mikrofon
     private View createMicIcon() {
         return new View(this) {
-
-            private final Paint paint =
-                new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
             @Override
             protected void onDraw(Canvas canvas) {
@@ -233,62 +228,36 @@ public class MainActivity extends Activity {
                 paint.setStrokeCap(Paint.Cap.ROUND);
                 paint.setStrokeJoin(Paint.Join.ROUND);
 
-                canvas.drawRoundRect(
-                    cx - 5, cy - 12,
-                    cx + 5, cy + 5,
-                    5, 5, paint
-                );
-
-                canvas.drawArc(
-                    cx - 10, cy - 7,
-                    cx + 10, cy + 12,
-                    0, 180, false, paint
-                );
-
-                canvas.drawLine(
-                    cx, cy + 12,
-                    cx, cy + 17, paint
-                );
-
-                canvas.drawLine(
-                    cx - 5, cy + 17,
-                    cx + 5, cy + 17, paint
-                );
+                canvas.drawRoundRect(cx - 5, cy - 12, cx + 5, cy + 5, 5, 5, paint);
+                canvas.drawArc(cx - 10, cy - 7, cx + 10, cy + 12, 0, 180, false, paint);
+                canvas.drawLine(cx, cy + 12, cx, cy + 17, paint);
+                canvas.drawLine(cx - 5, cy + 17, cx + 5, cy + 17, paint);
             }
         };
     }
 
-    // Tombol Akun: diturunkan dan diberi jarak dari pinggir
     private void createHeader() {
         LinearLayout header = new LinearLayout(this);
-        header.setGravity(
-            Gravity.RIGHT | Gravity.CENTER_VERTICAL
-        );
-
-        // Jarak atas 28 px, kanan 8 px
-        header.setPadding(0, 28, 8, 0);
+        header.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        header.setPadding(0, 28, 16, 0);
         header.setBackgroundColor(black);
 
-        Button account = makeButton("♙ Akun");
+        Button account = makeButton("Akun");
         account.setTextColor(green);
         account.setTextSize(14);
-        account.setPadding(10, 0, 10, 0);
+        account.setPadding(16, 0, 16, 0);
         account.setMinWidth(0);
         account.setMinimumWidth(0);
         account.setMinHeight(0);
         account.setMinimumHeight(0);
         account.setBackground(rounded(dark, 40));
-
         account.setOnClickListener(v -> showAccountInfo());
 
-        header.addView(account,
-            new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, 42
-            )
-        );
+        header.addView(account, new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, 42
+        ));
 
-        root.addView(header,
-            new LinearLayout.LayoutParams(-1, 66));
+        root.addView(header, new LinearLayout.LayoutParams(-1, 66));
     }
 
     private void showAccountInfo() {
@@ -303,43 +272,33 @@ public class MainActivity extends Activity {
             .show();
     }
 
-    // Bilah alamat saat membuka situs
     private void createAddressBar() {
         addressRow = new LinearLayout(this);
         addressRow.setGravity(Gravity.CENTER_VERTICAL);
         addressRow.setPadding(8, 3, 8, 3);
         addressRow.setBackgroundColor(black);
 
-        addressInput = makeInput(
-            "Cari atau masukkan alamat..."
-        );
-
-        addressRow.addView(addressInput,
-            new LinearLayout.LayoutParams(0, 48, 1));
+        addressInput = makeInput("Cari atau masukkan alamat...");
+        addressRow.addView(addressInput, new LinearLayout.LayoutParams(0, 48, 1));
 
         Button open = makeButton("Buka");
         open.setTextColor(green);
         addressRow.addView(open);
 
-        open.setOnClickListener(v ->
-            openAddress(addressInput));
+        open.setOnClickListener(v -> openAddress(addressInput));
 
-        addressInput.setOnEditorActionListener(
-            (v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_GO
-                        || actionId == EditorInfo.IME_ACTION_DONE) {
-                    openAddress(addressInput);
-                    return true;
-                }
-                return false;
+        addressInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE) {
+                openAddress(addressInput);
+                return true;
             }
-        );
+            return false;
+        });
 
         root.addView(addressRow);
         addressRow.setVisibility(View.GONE);
     }
 
-    // Navigasi browser
     private void createNavigation() {
         navRow = new LinearLayout(this);
         navRow.setGravity(Gravity.CENTER);
@@ -350,14 +309,10 @@ public class MainActivity extends Activity {
         Button home = makeButton("⌂ Beranda");
         Button editor = makeButton("</> HTML");
 
-        navRow.addView(back,
-            new LinearLayout.LayoutParams(0, 46, 1));
-        navRow.addView(refresh,
-            new LinearLayout.LayoutParams(0, 46, 1));
-        navRow.addView(home,
-            new LinearLayout.LayoutParams(0, 46, 1));
-        navRow.addView(editor,
-            new LinearLayout.LayoutParams(0, 46, 1));
+        navRow.addView(back, new LinearLayout.LayoutParams(0, 46, 1));
+        navRow.addView(refresh, new LinearLayout.LayoutParams(0, 46, 1));
+        navRow.addView(home, new LinearLayout.LayoutParams(0, 46, 1));
+        navRow.addView(editor, new LinearLayout.LayoutParams(0, 46, 1));
 
         back.setOnClickListener(v -> {
             if (webView.canGoBack()) {
@@ -378,119 +333,89 @@ public class MainActivity extends Activity {
     private void createContent() {
         contentFrame = new FrameLayout(this);
 
-        // HOME OoeR
+        // ===== HOME =====
         homePanel = new LinearLayout(this);
         homePanel.setOrientation(LinearLayout.VERTICAL);
         homePanel.setGravity(Gravity.CENTER_HORIZONTAL);
-        homePanel.setPadding(22, 20, 22, 20);
+        homePanel.setPadding(24, 0, 24, 0);
         homePanel.setBackgroundColor(black);
 
+        // Spacer atas
         View topSpace = new View(this);
-        homePanel.addView(topSpace,
-            new LinearLayout.LayoutParams(1, 0, 1));
+        homePanel.addView(topSpace, new LinearLayout.LayoutParams(1, 0, 1.2f));
 
-        // Logo dan warna tetap
-        addLogo(homePanel, 48);
+        // Logo
+        addLogo(homePanel, 52);
 
-        TextView subtitle = makeText(
-            "Jelajahi dunia dengan OoeR", 14, gray
-        );
+        // Subtitle
+        TextView subtitle = makeText("Jelajahi dunia dengan OoeR", 14, gray);
         subtitle.setGravity(Gravity.CENTER);
-        subtitle.setPadding(0, 8, 0, 30);
+        subtitle.setPadding(0, 10, 0, 36);
         homePanel.addView(subtitle);
 
-        // Kolom pencarian
+        // Search Bar
         LinearLayout searchBar = new LinearLayout(this);
         searchBar.setOrientation(LinearLayout.HORIZONTAL);
         searchBar.setGravity(Gravity.CENTER_VERTICAL);
-        searchBar.setPadding(8, 3, 5, 3);
-        searchBar.setBackground(rounded(dark, 28));
+        searchBar.setPadding(10, 4, 6, 4);
+        searchBar.setBackground(rounded(dark, 30));
 
-        RainbowSearchIcon searchIcon =
-            new RainbowSearchIcon();
+        RainbowSearchIcon searchIcon = new RainbowSearchIcon();
+        searchBar.addView(searchIcon, new LinearLayout.LayoutParams(40, 48));
 
-        searchBar.addView(searchIcon,
-            new LinearLayout.LayoutParams(38, 46));
+        homeSearchInput = makeInput("Cari apa");
+        homeSearchInput.setTextSize(15);
+        searchBar.addView(homeSearchInput, new LinearLayout.LayoutParams(0, 56, 1));
 
-        homeSearchInput = makeInput("Cari apa saja...");
-
-        homeSearchInput.setTextSize(14);
-
-        searchBar.addView(homeSearchInput,
-            new LinearLayout.LayoutParams(0, 54, 1));
-
-        // Ikon mikrofon tetap putih
         View mic = createMicIcon();
-
-        searchBar.addView(mic,
-            new LinearLayout.LayoutParams(38, 46));
-
+        searchBar.addView(mic, new LinearLayout.LayoutParams(40, 48));
         mic.setOnClickListener(v ->
-            Toast.makeText(
-                this,
-                "Fitur mikrofon akan dikembangkan",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Fitur mikrofon akan dikembangkan", Toast.LENGTH_SHORT).show()
         );
 
-        // Tombol panah tetap hijau
-        Button search = makeButton("↑");
-        search.setTextSize(23);
-        search.setTypeface(null, Typeface.BOLD);
-        search.setTextColor(Color.BLACK);
-        search.setGravity(Gravity.CENTER);
-        search.setPadding(0, 0, 0, 2);
-        search.setBackgroundTintList(
-            android.content.res.ColorStateList.valueOf(green)
+        Button searchBtn = makeButton("↑");
+        searchBtn.setTextSize(22);
+        searchBtn.setTypeface(null, Typeface.BOLD);
+        searchBtn.setTextColor(Color.BLACK);
+        searchBtn.setGravity(Gravity.CENTER);
+        searchBtn.setPadding(0, 0, 0, 2);
+        searchBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(green));
+        searchBar.addView(searchBtn, new LinearLayout.LayoutParams(48, 52));
+
+        // Search bar full width dengan margin
+        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 72
         );
-
-        searchBar.addView(search,
-            new LinearLayout.LayoutParams(42, 52));
-
-        // Kolom lebih pendek ke samping, lebih tinggi ke bawah
-        LinearLayout.LayoutParams searchParams =
-            new LinearLayout.LayoutParams(280, 70);
-
-        searchParams.gravity = Gravity.CENTER_HORIZONTAL;
-        searchParams.setMargins(12, 0, 12, 0);
-
+        searchParams.setMargins(8, 0, 8, 0);
         homePanel.addView(searchBar, searchParams);
 
-        search.setOnClickListener(v ->
-            openAddress(homeSearchInput));
-
-        homeSearchInput.setOnEditorActionListener(
-            (v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_GO
-                        || actionId == EditorInfo.IME_ACTION_DONE) {
-                    openAddress(homeSearchInput);
-                    return true;
-                }
-                return false;
+        searchBtn.setOnClickListener(v -> openAddress(homeSearchInput));
+        homeSearchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE) {
+                openAddress(homeSearchInput);
+                return true;
             }
-        );
+            return false;
+        });
 
-        // Area bawah Home tetap kosong
+        // Spacer bawah
         View bottomSpace = new View(this);
-        homePanel.addView(bottomSpace,
-            new LinearLayout.LayoutParams(1, 0, 2));
+        homePanel.addView(bottomSpace, new LinearLayout.LayoutParams(1, 0, 1.8f));
 
-        // WEB BROWSER
+        // ===== WEBVIEW =====
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 
-        // EDITOR HTML — tetap dipertahankan
+        // ===== HTML EDITOR =====
         htmlPanel = new LinearLayout(this);
         htmlPanel.setOrientation(LinearLayout.VERTICAL);
-        htmlPanel.setPadding(12, 8, 12, 12);
+        htmlPanel.setPadding(16, 12, 16, 12);
         htmlPanel.setBackgroundColor(black);
 
-        TextView htmlTitle = makeText(
-            "Editor HTML OoeR", 18, green
-        );
+        TextView htmlTitle = makeText("Editor HTML OoeR", 18, green);
         htmlPanel.addView(htmlTitle);
 
         htmlInput = new EditText(this);
@@ -498,59 +423,51 @@ public class MainActivity extends Activity {
         htmlInput.setHintTextColor(gray);
         htmlInput.setTextColor(white);
         htmlInput.setGravity(Gravity.TOP | Gravity.START);
-        htmlInput.setMinLines(4);
-        htmlInput.setPadding(12, 12, 12, 12);
+        htmlInput.setMinLines(5);
+        htmlInput.setPadding(14, 14, 14, 14);
         htmlInput.setBackground(rounded(dark, 12));
-
         htmlInput.setText(
-            "<h1>Selamat datang di OoeR</h1>" +
-            "<p>Ini adalah mesin render HTML OoeR.</p>" +
-            "<h2>Fitur awal</h2>" +
-            "<ul><li>Judul</li><li>Paragraf</li>" +
-            "<li>Daftar</li></ul><hr>" +
+            "<h1>Selamat datang di OoeR</h1>\n" +
+            "<p>Ini adalah mesin render HTML OoeR.</p>\n" +
+            "<h2>Fitur awal</h2>\n" +
+            "<ul>\n" +
+            "  <li>Judul</li>\n" +
+            "  <li>Paragraf</li>\n" +
+            "  <li>Daftar</li>\n" +
+            "</ul>\n" +
+            "<hr>\n" +
             "<p>Mesin akan terus dikembangkan.</p>"
         );
 
-        htmlPanel.addView(htmlInput,
-            new LinearLayout.LayoutParams(-1, 0, 1));
+        htmlPanel.addView(htmlInput, new LinearLayout.LayoutParams(-1, 0, 1));
 
         Button renderButton = makeButton("Tampilkan HTML");
         renderButton.setTextColor(green);
         htmlPanel.addView(renderButton);
 
-        TextView resultTitle = makeText(
-            "Hasil render:", 15, white
-        );
-        resultTitle.setPadding(0, 8, 0, 6);
+        TextView resultTitle = makeText("Hasil render:", 15, white);
+        resultTitle.setPadding(0, 12, 0, 8);
         htmlPanel.addView(resultTitle);
 
         ScrollView resultScroll = new ScrollView(this);
         resultScroll.setBackgroundColor(Color.WHITE);
+        resultScroll.setPadding(12, 12, 12, 12);
 
         renderView = new OeRRenderView(this);
         resultScroll.addView(renderView);
 
-        htmlPanel.addView(resultScroll,
-            new LinearLayout.LayoutParams(-1, 0, 1));
+        htmlPanel.addView(resultScroll, new LinearLayout.LayoutParams(-1, 0, 1));
 
         renderButton.setOnClickListener(v ->
-            renderView.renderHtml(
-                htmlInput.getText().toString()
-            )
+            renderView.renderHtml(htmlInput.getText().toString())
         );
 
-        // Tambahkan panel ke layar
-        contentFrame.addView(homePanel,
-            new FrameLayout.LayoutParams(-1, -1));
+        // Tambahkan ke contentFrame
+        contentFrame.addView(homePanel, new FrameLayout.LayoutParams(-1, -1));
+        contentFrame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
+        contentFrame.addView(htmlPanel, new FrameLayout.LayoutParams(-1, -1));
 
-        contentFrame.addView(webView,
-            new FrameLayout.LayoutParams(-1, -1));
-
-        contentFrame.addView(htmlPanel,
-            new FrameLayout.LayoutParams(-1, -1));
-
-        root.addView(contentFrame,
-            new LinearLayout.LayoutParams(-1, 0, 1));
+        root.addView(contentFrame, new LinearLayout.LayoutParams(-1, 0, 1));
     }
 
     private void showHome() {
@@ -575,46 +492,29 @@ public class MainActivity extends Activity {
         htmlPanel.setVisibility(View.VISIBLE);
         addressRow.setVisibility(View.GONE);
         navRow.setVisibility(View.GONE);
-
-        renderView.renderHtml(
-            htmlInput.getText().toString()
-        );
+        renderView.renderHtml(htmlInput.getText().toString());
     }
 
     private void openAddress(EditText input) {
         String query = input.getText().toString().trim();
 
         if (query.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Masukkan alamat atau pencarian",
-                Toast.LENGTH_SHORT
-            ).show();
+            Toast.makeText(this, "Masukkan alamat atau pencarian", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String url;
 
-        if (query.matches(
-                "(?i)^[a-z][a-z0-9+.-]*://.*")) {
+        if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
             url = query;
-
-        } else if (query.matches(
-                "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
+        } else if (query.matches("(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
             url = "https://" + query;
-
         } else {
             try {
-                url = "https://www.google.com/search?q="
-                    + java.net.URLEncoder.encode(
-                        query, "UTF-8"
-                    );
+                url = "https://www.google.com/search?q=" +
+                    java.net.URLEncoder.encode(query, "UTF-8");
             } catch (Exception e) {
-                Toast.makeText(
-                    this,
-                    "Pencarian gagal",
-                    Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(this, "Pencarian gagal", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -628,14 +528,12 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if (htmlPanel.getVisibility() == View.VISIBLE) {
             showHome();
-
         } else if (webView.getVisibility() == View.VISIBLE) {
             if (webView.canGoBack()) {
                 webView.goBack();
             } else {
                 showHome();
             }
-
         } else {
             super.onBackPressed();
         }
@@ -646,7 +544,94 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.destroy();
         }
-
         super.onDestroy();
+    }
+
+    // ============================================================
+    // Class OeRRenderView - Simple HTML Renderer
+    // ============================================================
+    private static class OeRRenderView extends LinearLayout {
+
+        public OeRRenderView(android.content.Context context) {
+            super(context);
+            setOrientation(VERTICAL);
+            setPadding(8, 8, 8, 8);
+        }
+
+        public void renderHtml(String html) {
+            removeAllViews();
+
+            if (html == null || html.trim().isEmpty()) {
+                TextView empty = new TextView(getContext());
+                empty.setText("Tidak ada konten");
+                empty.setTextColor(Color.GRAY);
+                addView(empty);
+                return;
+            }
+
+            // Parsing sangat sederhana (bukan full HTML parser)
+            String[] lines = html.split("\n");
+
+            for (String raw : lines) {
+                String line = raw.trim();
+                if (line.isEmpty()) continue;
+
+                TextView tv = new TextView(getContext());
+                tv.setTextColor(Color.BLACK);
+                tv.setPadding(0, 4, 0, 4);
+
+                if (line.startsWith("<h1>") && line.endsWith("</h1>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(24);
+                    tv.setTypeface(null, Typeface.BOLD);
+                    tv.setPadding(0, 12, 0, 8);
+                } else if (line.startsWith("<h2>") && line.endsWith("</h2>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(20);
+                    tv.setTypeface(null, Typeface.BOLD);
+                    tv.setPadding(0, 10, 0, 6);
+                } else if (line.startsWith("<h3>") && line.endsWith("</h3>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(17);
+                    tv.setTypeface(null, Typeface.BOLD);
+                } else if (line.startsWith("<p>") && line.endsWith("</p>")) {
+                    tv.setText(stripTags(line));
+                    tv.setTextSize(15);
+                    tv.setPadding(0, 6, 0, 6);
+                } else if (line.startsWith("<li>") && line.endsWith("</li>")) {
+                    tv.setText("•  " + stripTags(line));
+                    tv.setTextSize(15);
+                    tv.setPadding(16, 3, 0, 3);
+                } else if (line.equals("<hr>") || line.equals("<hr/>") || line.equals("<hr />")) {
+                    View lineView = new View(getContext());
+                    lineView.setBackgroundColor(Color.rgb(200, 200, 200));
+                    addView(lineView, new LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, 2
+                    ));
+                    continue;
+                } else if (line.startsWith("<ul>") || line.startsWith("</ul>") ||
+                           line.startsWith("<ol>") || line.startsWith("</ol>")) {
+                    continue; // skip container tags
+                } else {
+                    // fallback: tampilkan teks biasa (tanpa tag)
+                    String clean = stripTags(line);
+                    if (clean.isEmpty()) continue;
+                    tv.setText(clean);
+                    tv.setTextSize(15);
+                }
+
+                addView(tv);
+            }
+        }
+
+        private String stripTags(String input) {
+            return input
+                .replaceAll("<[^>]+>", "")
+                .replace("&nbsp;", " ")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
+                .trim();
+        }
     }
 }
