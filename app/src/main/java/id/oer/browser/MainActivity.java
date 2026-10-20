@@ -1002,38 +1002,53 @@ public class MainActivity extends Activity {
 
     // ==================== PENCARIAN ====================
 
-    private void openAddress(EditText input) {
-        String query = input.getText().toString().trim();
+private void openAddress(EditText input) {
+    String query = input.getText().toString().trim();
 
-        if (query.isEmpty()) {
-            Toast.makeText(this, "Masukkan alamat atau pencarian",
+    if (query.isEmpty()) {
+        Toast.makeText(this, "Masukkan alamat atau pencarian",
+                Toast.LENGTH_SHORT).show();
+        return;
+    }
+
+    // Jika dipanggil dari kolom pencarian beranda,
+    // buka halaman pencarian OeR.
+    if (input == homeSearchInput) {
+        showBrowser();
+        addressInput.setText(query);
+
+        String searchUrl = "file:///android_asset/search.html?q="
+                + Uri.encode(query);
+
+        webView.loadUrl(searchUrl);
+        return;
+    }
+
+    // Kolom alamat browser tetap berfungsi seperti biasa.
+    String url;
+
+    if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
+        url = query;
+    } else if (query.matches(
+            "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
+        url = "https://" + query;
+    } else {
+        try {
+            url = "https://www.google.com/search?q="
+                    + URLEncoder.encode(query, "UTF-8");
+        } catch (Exception e) {
+            Toast.makeText(this, "Pencarian gagal",
                     Toast.LENGTH_SHORT).show();
             return;
         }
-
-        String url;
-
-        if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
-            url = query;
-        } else if (query.matches(
-                "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
-            url = "https://" + query;
-        } else {
-            try {
-                url = "https://www.google.com/search?q="
-                        + URLEncoder.encode(query, "UTF-8");
-            } catch (Exception e) {
-                Toast.makeText(this, "Pencarian gagal",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-
-        addressInput.setText(url);
-        showBrowser();
-        webView.loadUrl(url);
     }
 
+    addressInput.setText(url);
+    showBrowser();
+    webView.loadUrl(url);
+}
+
+   
     // ==================== KEMBALI ====================
 
     @Override
