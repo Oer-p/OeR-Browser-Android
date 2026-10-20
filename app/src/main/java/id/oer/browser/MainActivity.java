@@ -1002,6 +1002,7 @@ public class MainActivity extends Activity {
 
     // ==================== PENCARIAN ====================
 
+
 private void openAddress(EditText input) {
     String query = input.getText().toString().trim();
 
@@ -1011,20 +1012,22 @@ private void openAddress(EditText input) {
         return;
     }
 
-    // Jika dipanggil dari kolom pencarian beranda,
-    // buka halaman pencarian OeR.
+    // Tombol pencarian beranda membuka OeR Search.
     if (input == homeSearchInput) {
         showBrowser();
-        addressInput.setText(query);
 
-        String searchUrl = "file:///android_asset/search.html?q="
-                + Uri.encode(query);
+        // Sembunyikan kolom alamat dan navigasi atas.
+        addressInput.setVisibility(View.GONE);
+        navRow.setVisibility(View.GONE);
 
-        webView.loadUrl(searchUrl);
+        webView.loadUrl(
+                "file:///android_asset/search.html?q="
+                        + Uri.encode(query)
+        );
         return;
     }
 
-    // Kolom alamat browser tetap berfungsi seperti biasa.
+    // Alamat website tetap bisa dibuka seperti biasa.
     String url;
 
     if (query.matches("(?i)^[a-z][a-z0-9+.-]*://.*")) {
@@ -1033,18 +1036,16 @@ private void openAddress(EditText input) {
             "(?i)^[a-z0-9.-]+\\.[a-z]{2,}(:\\d+)?(/.*)?$")) {
         url = "https://" + query;
     } else {
-        try {
-            url = "https://www.google.com/search?q="
-                    + URLEncoder.encode(query, "UTF-8");
-        } catch (Exception e) {
-            Toast.makeText(this, "Pencarian gagal",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
+        url = "https://www.google.com/search?q="
+                + Uri.encode(query);
     }
 
     addressInput.setText(url);
     showBrowser();
+
+    addressInput.setVisibility(View.VISIBLE);
+    navRow.setVisibility(View.VISIBLE);
+
     webView.loadUrl(url);
 }
 
