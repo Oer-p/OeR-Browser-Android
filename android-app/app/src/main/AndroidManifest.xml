@@ -17,5 +17,20 @@
             </intent-filter>
 
         </activity>
+        
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:label="OoeR"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        android:usesCleartextTraffic="true">
+
+        <!-- Pertahankan activity yang sudah ada di sini -->
+
     </application>
 </manifest>
+        
