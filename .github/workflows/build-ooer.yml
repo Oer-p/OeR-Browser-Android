@@ -1,5 +1,5 @@
 
-       name: Periksa AndroidManifest
+       - name: Periksa AndroidManifest
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
