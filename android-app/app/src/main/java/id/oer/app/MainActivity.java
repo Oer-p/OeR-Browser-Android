@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
 
     private static final String API = "http://127.0.0.1:3000";
     private static final int REQ_PICK_IMAGE = 101;
-    private static final int GREEN = Color.rgb(101, 163, 13);
+    private static final int GREEN = Color.rgb(46, 125, 50);
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -65,9 +65,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.WHITE);
-        getWindow().setNavigationBarColor(Color.WHITE);
-
         buildScreen();
         createSession();
     }
@@ -75,8 +72,9 @@ public class MainActivity extends Activity {
     private void buildScreen() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.rgb(248, 250, 247));
-        root.setPadding(dp(16), dp(12), dp(16), dp(10));
+        root.setBackgroundColor(Color.rgb(245, 247, 245));
+        root.setFitsSystemWindows(true); // Menyesuaikan dengan bilah navigasi HP
+        root.setPadding(dp(16), dp(12), dp(16), dp(36)); // Padding bawah dp(36) agar tombol naik
 
         // Header
         LinearLayout header = new LinearLayout(this);
@@ -132,7 +130,7 @@ public class MainActivity extends Activity {
 
         root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
-        // Pratinjau Foto Sebelum Dikirim
+        // Pratinjau Foto
         previewContainer = new LinearLayout(this);
         previewContainer.setOrientation(LinearLayout.HORIZONTAL);
         previewContainer.setGravity(Gravity.CENTER_VERTICAL);
@@ -144,37 +142,48 @@ public class MainActivity extends Activity {
         previewImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         Button removeImgBtn = new Button(this);
-        removeImgBtn.setText("❌ Batal Foto");
+        removeImgBtn.setText("❌ Batal");
         removeImgBtn.setOnClickListener(v -> clearSelectedPhoto());
 
         previewContainer.addView(previewImage);
         previewContainer.addView(removeImgBtn);
         root.addView(previewContainer);
 
-        // Input & Tombol Aksi
+        // Input
         input = new EditText(this);
-        input.setHint("Tulis materi atau pertanyaan untuk foto...");
+        input.setHint("Tulis materi atau pertanyaan...");
         input.setTextSize(15);
         input.setMinLines(2);
-        input.setMaxLines(4);
-        input.setPadding(dp(10), dp(10), dp(10), dp(10));
+        input.setMaxLines(3);
+        input.setPadding(dp(12), dp(10), dp(12), dp(10));
         input.setBackgroundColor(Color.WHITE);
         root.addView(input);
 
+        // Tombol Aksi (Foto & Kirim)
         LinearLayout actionRow = new LinearLayout(this);
         actionRow.setOrientation(LinearLayout.HORIZONTAL);
-        actionRow.setPadding(0, dp(6), 0, 0);
+        actionRow.setPadding(0, dp(8), 0, 0);
 
         Button cameraBtn = new Button(this);
         cameraBtn.setText("📷 Foto");
+        cameraBtn.setTextSize(15);
         cameraBtn.setOnClickListener(v -> openImagePicker());
 
         Button sendBtn = new Button(this);
         sendBtn.setText("🚀 Kirim Materi");
+        sendBtn.setTextSize(15);
+        sendBtn.setTypeface(null, Typeface.BOLD);
+        sendBtn.setTextColor(Color.WHITE);
+        sendBtn.setBackgroundColor(GREEN); // Warna hijau mencolok
         sendBtn.setOnClickListener(v -> sendMessage());
 
-        actionRow.addView(cameraBtn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        actionRow.addView(sendBtn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+        LinearLayout.LayoutParams camParams = new LinearLayout.LayoutParams(0, dp(48), 1);
+        camParams.setMargins(0, 0, dp(8), 0);
+        actionRow.addView(cameraBtn, camParams);
+
+        LinearLayout.LayoutParams sendParams = new LinearLayout.LayoutParams(0, dp(48), 2);
+        actionRow.addView(sendBtn, sendParams);
+
         root.addView(actionRow);
 
         setContentView(root);
@@ -245,7 +254,6 @@ public class MainActivity extends Activity {
         bubble.setBackgroundColor(human ? Color.rgb(220, 245, 200) : Color.WHITE);
         bubble.setPadding(dp(12), dp(10), dp(12), dp(10));
 
-        // Header Profil
         TextView label = new TextView(this);
         label.setText(human ? "👤 Kamu (Guru)" : "🤖 OoeR AI");
         label.setTextSize(13);
@@ -253,7 +261,6 @@ public class MainActivity extends Activity {
         label.setTextColor(human ? GREEN : Color.rgb(40, 100, 200));
         bubble.addView(label);
 
-        // Jika ada foto
         if (base64Image != null && !base64Image.isEmpty()) {
             try {
                 String cleanBase64 = base64Image.contains(",") ? base64Image.split(",")[1] : base64Image;
@@ -270,7 +277,6 @@ public class MainActivity extends Activity {
             } catch (Exception ignored) {}
         }
 
-        // Teks materi
         if (content != null && !content.isEmpty()) {
             TextView text = new TextView(this);
             text.setText(content);
