@@ -1,25 +1,56 @@
+name: Build OoER APK
 
-       - name: Periksa AndroidManifest
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Periksa AndroidManifest
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           path = 'android-app/app/src/main/AndroidManifest.xml'
 
-          with open(path, 'rb') as f:
-              data = f.read()
-
-          print("Awal file:", repr(data[:20]))
-          if data.startswith(b'\xef\xbb\xbf'):
-              print("Ditemukan UTF-8 BOM")
-
           try:
+              with open(path, 'rb') as f:
+                  data = f.read()
+
+              print("Awal file:", repr(data[:20]))
+              if data.startswith(b'\xef\xbb\xbf'):
+                  print("Ditemukan UTF-8 BOM, ini bisa memicu error di Gradle!")
+
               ET.fromstring(data)
-              print("XML VALID")
+              print("--> Status: XML VALID! <--")
           except ET.ParseError as e:
-              print(f"XML ERROR: {e}")
-              print(f"Baris: {e.position[0]}, kolom: {e.position[1]}")
-              raise
+              print(f"--> ERROR PARSING XML: {e} <--")
+              exit(1)
+          except Exception as e:
+              print(f"Error lain: {e}")
+              exit(1)
           PY
 
-      - name: Bangun APK OoeR
-        run: gradle -p android-app assembleDebug --stacktrace
+      - name: Siapkan Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Siapkan Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Bangun APK OoER
+        run: gradle -p android-app assembleDebug
+
+      - name: Simpan APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OoER-Browser-Debug
+          path: android-app/app/build/outputs/apk/debug/*.apk
