@@ -73,8 +73,8 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.rgb(245, 247, 245));
-        root.setFitsSystemWindows(true); // Menyesuaikan dengan bilah navigasi HP
-        root.setPadding(dp(16), dp(12), dp(16), dp(36)); // Padding bawah dp(36) agar tombol naik
+        root.setFitsSystemWindows(true);
+        root.setPadding(dp(16), dp(12), dp(16), dp(36));
 
         // Header
         LinearLayout header = new LinearLayout(this);
@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
         sendBtn.setTextSize(15);
         sendBtn.setTypeface(null, Typeface.BOLD);
         sendBtn.setTextColor(Color.WHITE);
-        sendBtn.setBackgroundColor(GREEN); // Warna hijau mencolok
+        sendBtn.setBackgroundColor(GREEN);
         sendBtn.setOnClickListener(v -> sendMessage());
 
         LinearLayout.LayoutParams camParams = new LinearLayout.LayoutParams(0, dp(48), 1);
@@ -420,7 +420,13 @@ public class MainActivity extends Activity {
                 }
 
                 JSONObject res = request("/ai/training/sessions/" + sessionId + "/messages", "POST", payload);
-                final String reply = res.optString("reply", "Materi dan foto berhasil dipelajari!");
+
+                // Membaca jawaban 'answer' dari backend Termux Anda
+                String aiAnswer = res.optString("answer", "");
+                if (aiAnswer.isEmpty()) aiAnswer = res.optString("reply", "");
+                if (aiAnswer.isEmpty()) aiAnswer = res.optString("message", "Materi dan foto berhasil dipelajari!");
+
+                final String reply = aiAnswer;
 
                 handler.post(() -> {
                     addMessage("ai", reply, null);
