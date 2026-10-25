@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
@@ -34,9 +35,19 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
+    // LINK API CLOUDFLARE AKTIF
     private static final String API = "https://spears-lol-instances-cod.trycloudflare.com";
     private static final int REQ_PICK_IMAGE = 101;
-    private static final int GREEN = Color.rgb(46, 125, 50);
+
+    // PALET WARNA MASTER DEVELOPER
+    private static final int COLOR_BG = Color.parseColor("#090D16");           // Hitam Obsidian
+    private static final int COLOR_SURFACE = Color.parseColor("#0F172A");      // Dark Slate Card
+    private static final int COLOR_SURFACE_LIGHT = Color.parseColor("#1E293B");// Surface Elemen
+    private static final int COLOR_ACCENT_CYAN = Color.parseColor("#06B6D4");  // Neon Cyan
+    private static final int COLOR_ACCENT_EMERALD = Color.parseColor("#10B981");// Emerald Green
+    private static final int COLOR_BORDER = Color.parseColor("#334155");       // Border Subtle
+    private static final int COLOR_TEXT_PRIMARY = Color.parseColor("#F1F5F9"); // Text Terang
+    private static final int COLOR_TEXT_SECONDARY = Color.parseColor("#94A3B8");// Text Muted
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -53,6 +64,17 @@ public class MainActivity extends Activity {
 
     private int dp(float value) {
         return (int) (value * getResources().getDisplayMetrics().density);
+    }
+
+    // Helper Pembuat Box Modern (Rounded + Border)
+    private GradientDrawable createBox(int bgColor, int cornerRadiusDp, int strokeColor, int strokeWidthDp) {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(bgColor);
+        gd.setCornerRadius(dp(cornerRadiusDp));
+        if (strokeWidthDp > 0) {
+            gd.setStroke(dp(strokeWidthDp), strokeColor);
+        }
+        return gd;
     }
 
     private void setStatus(String text) {
@@ -72,116 +94,168 @@ public class MainActivity extends Activity {
     private void buildScreen() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.rgb(245, 247, 245));
+        root.setBackgroundColor(COLOR_BG);
         root.setFitsSystemWindows(true);
-        root.setPadding(dp(16), dp(12), dp(16), dp(36));
+        root.setPadding(dp(16), dp(12), dp(16), dp(16));
 
-        // Header
+        // HEADER CYBER IDE
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
-        header.setPadding(0, dp(4), 0, dp(10));
+        header.setPadding(dp(16), dp(14), dp(16), dp(14));
+        header.setBackground(createBox(COLOR_SURFACE, 16, COLOR_BORDER, 1));
+
+        LinearLayout titleRow = new LinearLayout(this);
+        titleRow.setOrientation(LinearLayout.HORIZONTAL);
+        titleRow.setGravity(Gravity.CENTER_VERTICAL);
+
+        TextView iconTv = new TextView(this);
+        iconTv.setText("⚡ ");
+        iconTv.setTextSize(20);
 
         TextView logo = new TextView(this);
-        logo.setText("OoeR AI Studio");
-        logo.setTextColor(GREEN);
-        logo.setTextSize(24);
-        logo.setTypeface(null, Typeface.BOLD);
+        logo.setText("OoeR Pro");
+        logo.setTextColor(COLOR_ACCENT_CYAN);
+        logo.setTextSize(22);
+        logo.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+
+        TextView badge = new TextView(this);
+        badge.setText(" MASTER IDE ");
+        badge.setTextSize(10);
+        badge.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        badge.setTextColor(COLOR_ACCENT_EMERALD);
+        badge.setBackground(createBox(Color.parseColor("#064E3B"), 6, COLOR_ACCENT_EMERALD, 1));
+        badge.setPadding(dp(6), dp(2), dp(6), dp(2));
+        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        badgeParams.setMargins(dp(8), 0, 0, 0);
+
+        titleRow.addView(iconTv);
+        titleRow.addView(logo);
+        titleRow.addView(badge, badgeParams);
+        header.addView(titleRow);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("Ruang Pelatihan AI (Teks & Visual)");
-        subtitle.setTextColor(Color.DKGRAY);
-        subtitle.setTextSize(14);
+        subtitle.setText("Expert AI Coding & Neural Training");
+        subtitle.setTextColor(COLOR_TEXT_SECONDARY);
+        subtitle.setTextSize(12);
+        subtitle.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
+        subtitle.setPadding(0, dp(4), 0, dp(6));
+        header.addView(subtitle);
 
         status = new TextView(this);
-        status.setText("Menghubungkan ke Termux...");
-        status.setTextSize(12);
-        status.setTextColor(Color.GRAY);
-
-        header.addView(logo);
-        header.addView(subtitle);
+        status.setText("● READY • Terhubung ke Cloud Engine");
+        status.setTextSize(11);
+        status.setTextColor(COLOR_ACCENT_EMERALD);
+        status.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
         header.addView(status);
+
         root.addView(header);
 
-        // Toolbar
+        // TOOLBAR MODERN
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        toolbar.setPadding(0, dp(10), 0, dp(10));
 
         Button newBtn = new Button(this);
-        newBtn.setText("＋ Sesi Baru");
+        newBtn.setText("+ Sesi Baru");
+        newBtn.setTextSize(12);
+        newBtn.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        newBtn.setTextColor(COLOR_TEXT_PRIMARY);
+        newBtn.setBackground(createBox(COLOR_SURFACE_LIGHT, 10, COLOR_BORDER, 1));
         newBtn.setOnClickListener(v -> createSession());
 
         Button reloadBtn = new Button(this);
-        reloadBtn.setText("Muat Ulang");
+        reloadBtn.setText("↺ Sync");
+        reloadBtn.setTextSize(12);
+        reloadBtn.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        reloadBtn.setTextColor(COLOR_TEXT_SECONDARY);
+        reloadBtn.setBackground(createBox(COLOR_SURFACE, 10, COLOR_BORDER, 1));
         reloadBtn.setOnClickListener(v -> loadSession(sessionId));
 
-        toolbar.addView(newBtn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        toolbar.addView(reloadBtn);
+        LinearLayout.LayoutParams newBtnParams = new LinearLayout.LayoutParams(0, dp(40), 1);
+        newBtnParams.setMargins(0, 0, dp(8), 0);
+        toolbar.addView(newBtn, newBtnParams);
+
+        LinearLayout.LayoutParams reloadParams = new LinearLayout.LayoutParams(dp(80), dp(40));
+        toolbar.addView(reloadBtn, reloadParams);
+
         root.addView(toolbar);
 
-        // Chat List
+        // CHAT / CONSOLE OUTPUT LIST
         scroll = new ScrollView(this);
         scroll.setFillViewport(true);
 
         messages = new LinearLayout(this);
         messages.setOrientation(LinearLayout.VERTICAL);
-        messages.setPadding(0, dp(8), 0, dp(12));
+        messages.setPadding(0, dp(4), 0, dp(12));
         scroll.addView(messages);
 
         root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
-        // Pratinjau Foto
+        // PRATINJAU FOTO DENGAN BORDER NEON
         previewContainer = new LinearLayout(this);
         previewContainer.setOrientation(LinearLayout.HORIZONTAL);
         previewContainer.setGravity(Gravity.CENTER_VERTICAL);
-        previewContainer.setPadding(0, dp(4), 0, dp(4));
+        previewContainer.setPadding(dp(8), dp(6), dp(8), dp(6));
+        previewContainer.setBackground(createBox(COLOR_SURFACE, 10, COLOR_ACCENT_CYAN, 1));
         previewContainer.setVisibility(View.GONE);
 
         previewImage = new ImageView(this);
-        previewImage.setLayoutParams(new LinearLayout.LayoutParams(dp(70), dp(70)));
+        previewImage.setLayoutParams(new LinearLayout.LayoutParams(dp(60), dp(60)));
         previewImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         Button removeImgBtn = new Button(this);
-        removeImgBtn.setText("❌ Batal");
+        removeImgBtn.setText("✕ Hapus");
+        removeImgBtn.setTextSize(11);
+        removeImgBtn.setTextColor(Color.parseColor("#EF4444"));
+        removeImgBtn.setBackground(createBox(Color.TRANSPARENT, 6, Color.parseColor("#EF4444"), 1));
         removeImgBtn.setOnClickListener(v -> clearSelectedPhoto());
+        LinearLayout.LayoutParams rmParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(34));
+        rmParams.setMargins(dp(12), 0, 0, 0);
 
         previewContainer.addView(previewImage);
-        previewContainer.addView(removeImgBtn);
+        previewContainer.addView(removeImgBtn, rmParams);
         root.addView(previewContainer);
 
-        // Input
+        // KOTAK INPUT TERMINAL
         input = new EditText(this);
-        input.setHint("Tulis materi atau pertanyaan...");
-        input.setTextSize(15);
+        input.setHint("Ketik perintah atau masukkan kode program...");
+        input.setHintTextColor(COLOR_TEXT_SECONDARY);
+        input.setTextColor(COLOR_TEXT_PRIMARY);
+        input.setTextSize(14);
+        input.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
         input.setMinLines(2);
-        input.setMaxLines(3);
-        input.setPadding(dp(12), dp(10), dp(12), dp(10));
-        input.setBackgroundColor(Color.WHITE);
+        input.setMaxLines(4);
+        input.setPadding(dp(14), dp(12), dp(14), dp(12));
+        input.setBackground(createBox(COLOR_SURFACE, 14, COLOR_BORDER, 1));
         root.addView(input);
 
-        // Tombol Aksi (Foto & Kirim)
+        // TOMBOL AKSI
         LinearLayout actionRow = new LinearLayout(this);
         actionRow.setOrientation(LinearLayout.HORIZONTAL);
         actionRow.setPadding(0, dp(8), 0, 0);
 
         Button cameraBtn = new Button(this);
         cameraBtn.setText("📷 Foto");
-        cameraBtn.setTextSize(15);
+        cameraBtn.setTextSize(13);
+        cameraBtn.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        cameraBtn.setTextColor(COLOR_TEXT_PRIMARY);
+        cameraBtn.setBackground(createBox(COLOR_SURFACE_LIGHT, 12, COLOR_BORDER, 1));
         cameraBtn.setOnClickListener(v -> openImagePicker());
 
         Button sendBtn = new Button(this);
-        sendBtn.setText("🚀 Kirim Materi");
-        sendBtn.setTextSize(15);
-        sendBtn.setTypeface(null, Typeface.BOLD);
-        sendBtn.setTextColor(Color.WHITE);
-        sendBtn.setBackgroundColor(GREEN);
+        sendBtn.setText("▶ RUN / KIRIM");
+        sendBtn.setTextSize(13);
+        sendBtn.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        sendBtn.setTextColor(Color.parseColor("#090D16"));
+        sendBtn.setBackground(createBox(COLOR_ACCENT_CYAN, 12, COLOR_ACCENT_CYAN, 0));
         sendBtn.setOnClickListener(v -> sendMessage());
 
-        LinearLayout.LayoutParams camParams = new LinearLayout.LayoutParams(0, dp(48), 1);
+        LinearLayout.LayoutParams camParams = new LinearLayout.LayoutParams(0, dp(46), 1);
         camParams.setMargins(0, 0, dp(8), 0);
         actionRow.addView(cameraBtn, camParams);
 
-        LinearLayout.LayoutParams sendParams = new LinearLayout.LayoutParams(0, dp(48), 2);
+        LinearLayout.LayoutParams sendParams = new LinearLayout.LayoutParams(0, dp(46), 2);
         actionRow.addView(sendBtn, sendParams);
 
         root.addView(actionRow);
@@ -194,7 +268,7 @@ public class MainActivity extends Activity {
         pickIntent.setType("image/*");
 
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        Intent chooserIntent = Intent.createChooser(pickIntent, "Pilih Sumber Foto Materi");
+        Intent chooserIntent = Intent.createChooser(pickIntent, "Pilih Sumber Materi Kode");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takePhotoIntent});
 
         startActivityForResult(chooserIntent, REQ_PICK_IMAGE);
@@ -246,12 +320,11 @@ public class MainActivity extends Activity {
         return "data:image/jpeg;base64," + Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
     }
 
-    // Fungsi Animasi Mengetik Huruf per Huruf (Typewriter)
     private void typeWriter(TextView tv, String fullText, int index) {
         if (index <= fullText.length()) {
             tv.setText(fullText.substring(0, index));
             scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
-            handler.postDelayed(() -> typeWriter(tv, fullText, index + 1), 18); // 18ms per huruf (kecepatan ketik)
+            handler.postDelayed(() -> typeWriter(tv, fullText, index + 1), 16);
         }
     }
 
@@ -259,19 +332,26 @@ public class MainActivity extends Activity {
         addMessage(speaker, content, base64Image, false);
     }
 
+    // GAYA BALON TERMINAL IDE MODERN
     private void addMessage(String speaker, String content, String base64Image, boolean animateTyping) {
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
 
         boolean human = "human".equalsIgnoreCase(speaker) || "user".equalsIgnoreCase(speaker);
-        bubble.setBackgroundColor(human ? Color.rgb(220, 245, 200) : Color.WHITE);
-        bubble.setPadding(dp(12), dp(10), dp(12), dp(10));
 
+        if (human) {
+            bubble.setBackground(createBox(COLOR_SURFACE_LIGHT, 14, Color.parseColor("#475569"), 1));
+        } else {
+            bubble.setBackground(createBox(COLOR_SURFACE, 14, COLOR_BORDER, 1));
+        }
+        bubble.setPadding(dp(14), dp(12), dp(14), dp(12));
+
+        // HEADER LABEL DI DALAM BALON
         TextView label = new TextView(this);
-        label.setText(human ? "👤 Kamu (Guru)" : "🤖 OoeR AI");
-        label.setTextSize(13);
-        label.setTypeface(null, Typeface.BOLD);
-        label.setTextColor(human ? GREEN : Color.rgb(40, 100, 200));
+        label.setText(human ? "👤 DEVELOPER" : "⚡ OoeR MASTER AI");
+        label.setTextSize(11);
+        label.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        label.setTextColor(human ? COLOR_ACCENT_CYAN : COLOR_ACCENT_EMERALD);
         bubble.addView(label);
 
         if (base64Image != null && !base64Image.isEmpty()) {
@@ -284,7 +364,7 @@ public class MainActivity extends Activity {
                     iv.setImageBitmap(img);
                     iv.setAdjustViewBounds(true);
                     iv.setMaxHeight(dp(220));
-                    iv.setPadding(0, dp(6), 0, dp(6));
+                    iv.setPadding(0, dp(8), 0, dp(8));
                     bubble.addView(iv);
                 }
             } catch (Exception ignored) {}
@@ -292,8 +372,11 @@ public class MainActivity extends Activity {
 
         if (content != null && !content.isEmpty()) {
             TextView text = new TextView(this);
-            text.setTextSize(15);
-            text.setTextColor(Color.rgb(35, 35, 35));
+            text.setTextSize(14);
+            text.setTextColor(COLOR_TEXT_PRIMARY);
+            text.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
+            text.setLineSpacing(dp(3), 1.1f);
+            text.setPadding(0, dp(4), 0, 0);
             bubble.addView(text);
 
             if (animateTyping) {
@@ -308,7 +391,7 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, dp(4), 0, dp(4));
+        params.setMargins(0, dp(6), 0, dp(6));
         messages.addView(bubble, params);
 
         scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
@@ -356,7 +439,7 @@ public class MainActivity extends Activity {
     private void loadSession(String id) {
         if (busy) return;
         busy = true;
-        setStatus("Memuat sesi " + id + "...");
+        setStatus("● SYNCING • Memuat sesi " + id + "...");
 
         new Thread(() -> {
             try {
@@ -379,10 +462,10 @@ public class MainActivity extends Activity {
                             }
                         }
                     }
-                    setStatus("Terhubung • Sesi " + sessionId);
+                    setStatus("● READY • Terhubung ke Sesi #" + sessionId);
                 });
             } catch (Exception e) {
-                handler.post(() -> setStatus("Gagal memuat: " + e.getMessage()));
+                handler.post(() -> setStatus("✕ ERROR: " + e.getMessage()));
             } finally {
                 handler.post(() -> busy = false);
             }
@@ -392,24 +475,24 @@ public class MainActivity extends Activity {
     private void createSession() {
         if (busy) return;
         busy = true;
-        setStatus("Membuat sesi pelatihan...");
+        setStatus("● INITIALIZING • Membuat sesi master baru...");
 
         new Thread(() -> {
             try {
                 JSONObject res = request("/ai/training/sessions", "POST", new JSONObject());
                 JSONObject session = res.optJSONObject("session");
                 final String newId = session != null ? session.optString("id", "1") : "1";
-                final String q = session != null ? session.optString("question", "Halo! Mau melatih apa hari ini?") : "";
+                final String q = session != null ? session.optString("question", "OoeR Master IDE Siap. Ketik kode atau instruksi logika:") : "";
 
                 handler.post(() -> {
                     sessionId = newId;
                     messages.removeAllViews();
                     clearSelectedPhoto();
                     addMessage("ai", q, null, false);
-                    setStatus("Terhubung • Sesi " + sessionId);
+                    setStatus("● READY • Sesi Master #" + sessionId);
                 });
             } catch (Exception e) {
-                handler.post(() -> setStatus("Gagal sesi: " + e.getMessage()));
+                handler.post(() -> setStatus("✕ ERROR: " + e.getMessage()));
             } finally {
                 handler.post(() -> busy = false);
             }
@@ -428,13 +511,10 @@ public class MainActivity extends Activity {
         clearSelectedPhoto();
 
         final String base64Img = (photoToSend != null) ? bitmapToBase64(photoToSend) : null;
-        
-        // 1. Tampilkan pesan pengguna
-        addMessage("human", text, base64Img, false);
 
-        // 2. Tampilkan indikator sementara
-        addMessage("ai", "⏳ OoeR AI sedang berpikir...", null, false);
-        setStatus("OoeR AI sedang memproses materi...");
+        addMessage("human", text, base64Img, false);
+        addMessage("ai", "⚡ [EXECUTE] Menganalisis algoritma & logika kode...", null, false);
+        setStatus("● EXECUTING • AI sedang memproses kode...");
 
         new Thread(() -> {
             try {
@@ -448,19 +528,17 @@ public class MainActivity extends Activity {
 
                 String aiAnswer = res.optString("answer", "");
                 if (aiAnswer.isEmpty()) aiAnswer = res.optString("reply", "");
-                if (aiAnswer.isEmpty()) aiAnswer = res.optString("message", "Materi dan foto berhasil dipelajari!");
+                if (aiAnswer.isEmpty()) aiAnswer = res.optString("message", "Selesai dieksekusi!");
 
                 final String reply = aiAnswer;
 
                 handler.post(() -> {
-                    // Hapus balon indikator "sedang berpikir..."
                     int count = messages.getChildCount();
                     if (count > 0) {
                         messages.removeViewAt(count - 1);
                     }
-                    // Tampilkan jawaban dengan EFEK DIKETIK (true)
                     addMessage("ai", reply, null, true);
-                    setStatus("Terhubung • Sesi " + sessionId);
+                    setStatus("● READY • Sesi Master #" + sessionId);
                 });
             } catch (Exception e) {
                 handler.post(() -> {
@@ -468,8 +546,8 @@ public class MainActivity extends Activity {
                     if (count > 0) {
                         messages.removeViewAt(count - 1);
                     }
-                    addMessage("ai", "⚠️ Gagal mengirim: " + e.getMessage(), null, false);
-                    setStatus("Error saat mengirim materi.");
+                    addMessage("ai", "✕ [RUNTIME ERROR]: " + e.getMessage(), null, false);
+                    setStatus("✕ Runtime Error!");
                 });
             } finally {
                 handler.post(() -> busy = false);
