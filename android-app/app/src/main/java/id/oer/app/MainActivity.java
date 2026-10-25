@@ -35,8 +35,8 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
-    // LINK API CLOUDFLARE AKTIF
-    private static final String API = "https://spears-lol-instances-cod.trycloudflare.com";
+    // LINK API CLOU
+    private static final String API = "https://spears-lol-instances-cod.trycloudflare.com/api/chat";
     private static final int REQ_PICK_IMAGE = 101;
 
     // PALET WARNA MASTER DEVELOPER
