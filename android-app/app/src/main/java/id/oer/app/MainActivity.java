@@ -217,7 +217,6 @@ public class MainActivity extends Activity {
             }
 
             if (bmp != null) {
-                // Dioptimalkan ke 480 agar pemrosesan visual jauh lebih cepat di CPU HP
                 selectedBitmap = scaleDown(bmp, 480);
                 previewImage.setImageBitmap(selectedBitmap);
                 previewContainer.setVisibility(View.VISIBLE);
@@ -247,7 +246,20 @@ public class MainActivity extends Activity {
         return "data:image/jpeg;base64," + Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
     }
 
+    // Fungsi Animasi Mengetik Huruf per Huruf (Typewriter)
+    private void typeWriter(TextView tv, String fullText, int index) {
+        if (index <= fullText.length()) {
+            tv.setText(fullText.substring(0, index));
+            scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
+            handler.postDelayed(() -> typeWriter(tv, fullText, index + 1), 18); // 18ms per huruf (kecepatan ketik)
+        }
+    }
+
     private void addMessage(String speaker, String content, String base64Image) {
+        addMessage(speaker, content, base64Image, false);
+    }
+
+    private void addMessage(String speaker, String content, String base64Image, boolean animateTyping) {
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
 
@@ -280,10 +292,16 @@ public class MainActivity extends Activity {
 
         if (content != null && !content.isEmpty()) {
             TextView text = new TextView(this);
-            text.setText(content);
             text.setTextSize(15);
             text.setTextColor(Color.rgb(35, 35, 35));
             bubble.addView(text);
+
+            if (animateTyping) {
+                text.setText("");
+                typeWriter(text, content, 0);
+            } else {
+                text.setText(content);
+            }
         }
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -355,7 +373,8 @@ public class MainActivity extends Activity {
                                 addMessage(
                                         item.optString("speaker", "ai"),
                                         item.optString("content", ""),
-                                        item.optString("image", null)
+                                        item.optString("image", null),
+                                        false
                                 );
                             }
                         }
@@ -386,7 +405,7 @@ public class MainActivity extends Activity {
                     sessionId = newId;
                     messages.removeAllViews();
                     clearSelectedPhoto();
-                    addMessage("ai", q, null);
+                    addMessage("ai", q, null, false);
                     setStatus("Terhubung • Sesi " + sessionId);
                 });
             } catch (Exception e) {
@@ -411,10 +430,10 @@ public class MainActivity extends Activity {
         final String base64Img = (photoToSend != null) ? bitmapToBase64(photoToSend) : null;
         
         // 1. Tampilkan pesan pengguna
-        addMessage("human", text, base64Img);
+        addMessage("human", text, base64Img, false);
 
-        // 2. Langsung tampilkan balon AI "sedang mengetik..." agar aplikasi responsif seketika
-        addMessage("ai", "⏳ OoeR AI sedang berpikir dan mengetik...", null);
+        // 2. Tampilkan indikator sementara
+        addMessage("ai", "⏳ OoeR AI sedang berpikir...", null, false);
         setStatus("OoeR AI sedang memproses materi...");
 
         new Thread(() -> {
@@ -434,12 +453,13 @@ public class MainActivity extends Activity {
                 final String reply = aiAnswer;
 
                 handler.post(() -> {
-                    // Hapus balon sementara "sedang mengetik...", lalu gantikan dengan jawaban asli
+                    // Hapus balon indikator "sedang berpikir..."
                     int count = messages.getChildCount();
                     if (count > 0) {
                         messages.removeViewAt(count - 1);
                     }
-                    addMessage("ai", reply, null);
+                    // Tampilkan jawaban dengan EFEK DIKETIK (true)
+                    addMessage("ai", reply, null, true);
                     setStatus("Terhubung • Sesi " + sessionId);
                 });
             } catch (Exception e) {
@@ -448,7 +468,7 @@ public class MainActivity extends Activity {
                     if (count > 0) {
                         messages.removeViewAt(count - 1);
                     }
-                    addMessage("ai", "⚠️ Gagal mengirim: " + e.getMessage(), null);
+                    addMessage("ai", "⚠️ Gagal mengirim: " + e.getMessage(), null, false);
                     setStatus("Error saat mengirim materi.");
                 });
             } finally {
