@@ -20,6 +20,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Toast;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -35,19 +38,19 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
-    // LINK API CLOU
-    private static final String API = "https://spears-lol-instances-cod.trycloudflare.com/api/chat";
+    // LINK AKTIF CLOUDFLARE KAMU
+    private static final String API = "https://sheer-framework-black-romantic.trycloudflare.com";
     private static final int REQ_PICK_IMAGE = 101;
 
-    // PALET WARNA MASTER DEVELOPER
+    // PALET WARNA MASTER DEVELOPER (DARK IDE)
     private static final int COLOR_BG = Color.parseColor("#090D16");           // Hitam Obsidian
-    private static final int COLOR_SURFACE = Color.parseColor("#0F172A");      // Dark Slate Card
+    private static final int COLOR_SURFACE = Color.parseColor("#0F172A");      // Slate Card
     private static final int COLOR_SURFACE_LIGHT = Color.parseColor("#1E293B");// Surface Elemen
     private static final int COLOR_ACCENT_CYAN = Color.parseColor("#06B6D4");  // Neon Cyan
     private static final int COLOR_ACCENT_EMERALD = Color.parseColor("#10B981");// Emerald Green
     private static final int COLOR_BORDER = Color.parseColor("#334155");       // Border Subtle
-    private static final int COLOR_TEXT_PRIMARY = Color.parseColor("#F1F5F9"); // Text Terang
-    private static final int COLOR_TEXT_SECONDARY = Color.parseColor("#94A3B8");// Text Muted
+    private static final int COLOR_TEXT_PRIMARY = Color.parseColor("#F1F5F9"); // Teks Utama
+    private static final int COLOR_TEXT_SECONDARY = Color.parseColor("#94A3B8");// Teks Muted
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -192,7 +195,7 @@ public class MainActivity extends Activity {
 
         root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
-        // PRATINJAU FOTO DENGAN BORDER NEON
+        // PRATINJAU FOTO
         previewContainer = new LinearLayout(this);
         previewContainer.setOrientation(LinearLayout.HORIZONTAL);
         previewContainer.setGravity(Gravity.CENTER_VERTICAL);
@@ -332,7 +335,7 @@ public class MainActivity extends Activity {
         addMessage(speaker, content, base64Image, false);
     }
 
-    // GAYA BALON TERMINAL IDE MODERN
+    // BALON TERMINAL DENGAN FITUR COPY / SALIN
     private void addMessage(String speaker, String content, String base64Image, boolean animateTyping) {
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
@@ -346,7 +349,18 @@ public class MainActivity extends Activity {
         }
         bubble.setPadding(dp(14), dp(12), dp(14), dp(12));
 
-        // HEADER LABEL DI DALAM BALON
+        // TEKAN LAMA UNTUK SALIN SELURUH TEKS
+        bubble.setOnLongClickListener(v -> {
+            if (content != null && !content.isEmpty()) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("OoeR AI", content);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "📋 Teks berhasil disalin!", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
+
+        // HEADER LABEL
         TextView label = new TextView(this);
         label.setText(human ? "👤 DEVELOPER" : "⚡ OoeR MASTER AI");
         label.setTextSize(11);
@@ -377,6 +391,10 @@ public class MainActivity extends Activity {
             text.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
             text.setLineSpacing(dp(3), 1.1f);
             text.setPadding(0, dp(4), 0, 0);
+
+            // BISA DI-BLOK & DI-COPY MANUAL
+            text.setTextIsSelectable(true);
+
             bubble.addView(text);
 
             if (animateTyping) {
