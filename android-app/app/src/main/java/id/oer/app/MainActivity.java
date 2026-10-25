@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
-    private static final String API = "http://127.0.0.1:3000";
+    private static final String API = "https://spears-lol-instances-cod.trycloudflare.com";
     private static final int REQ_PICK_IMAGE = 101;
     private static final int GREEN = Color.rgb(46, 125, 50);
 
