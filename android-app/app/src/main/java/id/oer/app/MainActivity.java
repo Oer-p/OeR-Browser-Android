@@ -217,7 +217,8 @@ public class MainActivity extends Activity {
             }
 
             if (bmp != null) {
-                selectedBitmap = scaleDown(bmp, 800);
+                // Dioptimalkan ke 480 agar pemrosesan visual jauh lebih cepat di CPU HP
+                selectedBitmap = scaleDown(bmp, 480);
                 previewImage.setImageBitmap(selectedBitmap);
                 previewContainer.setVisibility(View.VISIBLE);
             }
@@ -408,8 +409,13 @@ public class MainActivity extends Activity {
         clearSelectedPhoto();
 
         final String base64Img = (photoToSend != null) ? bitmapToBase64(photoToSend) : null;
+        
+        // 1. Tampilkan pesan pengguna
         addMessage("human", text, base64Img);
-        setStatus("OoeR AI sedang memproses & mempelajari materi...");
+
+        // 2. Langsung tampilkan balon AI "sedang mengetik..." agar aplikasi responsif seketika
+        addMessage("ai", "⏳ OoeR AI sedang berpikir dan mengetik...", null);
+        setStatus("OoeR AI sedang memproses materi...");
 
         new Thread(() -> {
             try {
@@ -421,7 +427,6 @@ public class MainActivity extends Activity {
 
                 JSONObject res = request("/ai/training/sessions/" + sessionId + "/messages", "POST", payload);
 
-                // Membaca jawaban 'answer' dari backend Termux Anda
                 String aiAnswer = res.optString("answer", "");
                 if (aiAnswer.isEmpty()) aiAnswer = res.optString("reply", "");
                 if (aiAnswer.isEmpty()) aiAnswer = res.optString("message", "Materi dan foto berhasil dipelajari!");
@@ -429,11 +434,20 @@ public class MainActivity extends Activity {
                 final String reply = aiAnswer;
 
                 handler.post(() -> {
+                    // Hapus balon sementara "sedang mengetik...", lalu gantikan dengan jawaban asli
+                    int count = messages.getChildCount();
+                    if (count > 0) {
+                        messages.removeViewAt(count - 1);
+                    }
                     addMessage("ai", reply, null);
                     setStatus("Terhubung • Sesi " + sessionId);
                 });
             } catch (Exception e) {
                 handler.post(() -> {
+                    int count = messages.getChildCount();
+                    if (count > 0) {
+                        messages.removeViewAt(count - 1);
+                    }
                     addMessage("ai", "⚠️ Gagal mengirim: " + e.getMessage(), null);
                     setStatus("Error saat mengirim materi.");
                 });
